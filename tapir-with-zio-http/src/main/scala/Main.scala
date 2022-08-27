@@ -18,6 +18,8 @@ object Main extends ZIOAppDefault {
       myEndpoint.zServerLogic(name => ZIO.succeed(s"name : $name"))
     )
 
-  override def run =
-    Server.start(8090, myHttp)
+  override def run = {
+    Console.printLine("server start") *>
+      Server.start(8090, myHttp)
+  }
 }
