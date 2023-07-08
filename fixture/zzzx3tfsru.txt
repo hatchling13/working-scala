@@ -1,0 +1,16 @@
+{
+  "animals": [
+    {
+      "name": "Lion",
+      "species": "Panthera leo",
+      "habitat": "Grasslands",
+      "diet": "Carnivore"
+    },
+    {
+      "name": "Elephant",
+      "species": "Loxodonta africana",
+      "habitat": "Savannah, Forests",
+      "diet": "Herbivore"
+    }
+  ]
+}

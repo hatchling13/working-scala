@@ -1,0 +1,34 @@
+{
+  "fruits": [
+    {
+      "name": "Apple",
+      "color": "Red",
+      "taste": "Sweet",
+      "origin": "North America"
+    },
+    {
+      "name": "Banana",
+      "color": "Yellow",
+      "taste": "Sweet",
+      "origin": "Southeast Asia"
+    },
+    {
+      "name": "Orange",
+      "color": "Orange",
+      "taste": "Citrusy",
+      "origin": "Southeast Asia"
+    },
+    {
+      "name": "Grapes",
+      "color": "Green",
+      "taste": "Sweet",
+      "origin": "Europe"
+    },
+    {
+      "name": "Strawberry",
+      "color": "Red",
+      "taste": "Sweet",
+      "origin": "North America"
+    }
+  ]
+}

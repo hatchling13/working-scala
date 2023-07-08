@@ -1,0 +1,22 @@
+{
+  "friends": [
+    {
+      "name": "John",
+      "age": 30,
+      "hobbies": ["reading", "playing guitar"],
+      "location": "New York"
+    },
+    {
+      "name": "Sarah",
+      "age": 28,
+      "hobbies": ["painting", "hiking", "cooking"],
+      "location": "Los Angeles"
+    },
+    {
+      "name": "Michael",
+      "age": 32,
+      "hobbies": ["running", "watching movies"],
+      "location": "Chicago"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+INSERT INTO `zcxv` (`id`, `name`) VALUES (1, 'zcxv');
