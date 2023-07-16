@@ -51,7 +51,11 @@ lazy val `http-client` = project
   .settings(
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio-http" % "3.0.0-RC2",
-      "com.lihaoyi" %% "ujson" % "3.0.0"
+      "com.lihaoyi" %% "ujson" % "3.0.0",
+      "dev.zio" %% "zio-json" % "0.6.0",
+      "com.softwaremill.sttp.client3" %% "core" % "3.8.16",
+      "com.softwaremill.sttp.client3" %% "zio-json" % "3.8.16",
+      "com.softwaremill.sttp.client3" %% "zio" % "3.8.16" // for ZIO 2.x
     )
   )
 
@@ -60,6 +64,7 @@ lazy val `read-file` = project
   .settings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %% "os-lib" % "0.9.1",
-      "com.lihaoyi" %% "ujson" % "3.0.0"
+      "com.lihaoyi" %% "ujson" % "3.0.0",
+      "dev.zio" %% "zio-json" % "0.3.0-RC10"
     )
   )
