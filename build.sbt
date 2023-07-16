@@ -71,3 +71,8 @@ lazy val `cheese` = project
       "dev.zio" %% "zio-http" % "3.0.0-RC2"
     )
   )
+
+lazy val `deepZIOExam` = project
+  .settings(sharedSettings)
+  .settings(
+  )
