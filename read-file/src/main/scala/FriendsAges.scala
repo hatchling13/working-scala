@@ -19,6 +19,8 @@ abstract class SimpleError(message: String = "", cause: Throwable = null)
 object SimpleError {
   final case class ReadFail(cause: Throwable)
       extends SimpleError(s"read fail: ", cause)
+  final case class FindFriendsFail(cause: Throwable)
+      extends SimpleError(s"friends를 찾지 못했어요: ", cause)
 }
 
 object FriendsAges extends ZIOAppDefault {
@@ -35,7 +37,6 @@ object FriendsAges extends ZIOAppDefault {
       json <- ZIO
         .attempt(ujson.read(os.read(path / s"$name")))
         .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
-      _ <- Console.printLine(s"$json").ignore
     } yield json
 
   // ADT는 enum의 상위 개념입니다. https://blog.rockthejvm.com/algebraic-data-types/
@@ -44,6 +45,14 @@ object FriendsAges extends ZIOAppDefault {
     case class FailGenerateReport(cause: SimpleError) extends SimpleReport
     case class SuccessGenerateReport(message: String) extends SimpleReport
   }
+
+  def getAge(json: Value): ZIO[Any, SimpleError.FindFriendsFail, List[Int]] =
+    for {
+      friends <- ZIO
+        .attempt(json("friends"))
+        .catchAll(cause => ZIO.fail(SimpleError.FindFriendsFail(cause)))
+      ages = friends.arr.map(friend => friend("age").num.toInt).toList
+    } yield ages
 
   // 프로그램 시작점
   override def run = for {
@@ -55,27 +64,12 @@ object FriendsAges extends ZIOAppDefault {
       (
         for {
           json <- readJson(name)
-        } yield SuccessGenerateReport(s"뭔지는 모르겠지만 json 입니다. ${json}")
-      ).catchAll(e => ZIO.succeed(FailGenerateReport(e)))
+          age <- getAge(json)
+          _ = println(s"age = ${age}")
+        } yield age
+      ).catchAll(e => ZIO.attempt(List()))
     }
-
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-
-    // 패턴 매칭은 정적 타입 언어에서 사용할 수 있는 강력한 도구입니다. https://docs.scala-lang.org/ko/tour/pattern-matching.html
-    _ <- ZIO.foreachDiscard(reports) { report =>
-      report match {
-        case FailGenerateReport(error) =>
-          Console.printLine(s"생성 실패한 리포트 입니다: ${error}")
-        case SuccessGenerateReport(message) =>
-          Console.printLine(s"생성 성공한 리포트 입니다: ${message}")
-      }
-    }
+    ages = reports.flatten
+    _ = println(s"친구들의 나이 평균은 ${ages.sum / ages.length}")
   } yield ()
 }
