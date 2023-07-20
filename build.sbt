@@ -68,3 +68,5 @@ lazy val `read-file` = project
       "dev.zio" %% "zio-json" % "0.3.0-RC10"
     )
   )
+
+lazy val `modeling-youtube` = project.settings(sharedSettings)
