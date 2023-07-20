@@ -20,6 +20,8 @@ abstract class SimpleError(message: String = "", cause: Throwable = null)
 object SimpleError {
   final case class ReadFail(cause: Throwable)
       extends SimpleError(s"read fail: ", cause)
+  final case class FindFriendsFail(cause: Throwable)
+      extends SimpleError(s"friends를 찾지 못했어요: ", cause)
 }
 
 case class Friend(
@@ -45,7 +47,6 @@ object FriendsAges extends ZIOAppDefault {
       json <- ZIO
         .attempt(ujson.read(os.read(path / s"$name")))
         .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
-      _ <- Console.printLine(s"$json").ignore
     } yield json
 
   // ADT는 enum의 상위 개념입니다. https://blog.rockthejvm.com/algebraic-data-types/
@@ -54,6 +55,14 @@ object FriendsAges extends ZIOAppDefault {
     case class FailGenerateReport(cause: SimpleError) extends SimpleReport
     case class SuccessGenerateReport(message: String) extends SimpleReport
   }
+
+  def getAge(json: Value): ZIO[Any, SimpleError.FindFriendsFail, List[Int]] =
+    for {
+      friends <- ZIO
+        .attempt(json("friends"))
+        .catchAll(cause => ZIO.fail(SimpleError.FindFriendsFail(cause)))
+      ages = friends.arr.map(friend => friend("age").num.toInt).toList
+    } yield ages
 
   // 프로그램 시작점
   override def run = for {
@@ -102,6 +111,5 @@ object FriendsAges extends ZIOAppDefault {
       .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
 
     _ <- Console.printLine(s"Average age of friends is $average!")
-
   } yield ()
 }
