@@ -7,6 +7,7 @@
 import FriendsAges.SimpleReport.{FailGenerateReport, SuccessGenerateReport}
 import ujson.Value.Value
 import zio._
+import zio.json._
 
 import java.io.Serializable
 
@@ -21,8 +22,17 @@ object SimpleError {
       extends SimpleError(s"read fail: ", cause)
 }
 
-object FriendsAges extends ZIOAppDefault {
+case class Friend(
+    name: String,
+    age: Int,
+    hobbies: List[String],
+    location: String
+)
+object Friend {
+  implicit val decoder: JsonDecoder[Friend] = DeriveJsonDecoder.gen[Friend]
+}
 
+object FriendsAges extends ZIOAppDefault {
 
   // python처럼 쉽게 파일을 읽을 수 있는 라이브러리 https://github.com/com-lihaoyi/os-lib
   val path = os.pwd / "fixture"
@@ -55,27 +65,43 @@ object FriendsAges extends ZIOAppDefault {
       (
         for {
           json <- readJson(name)
-        } yield SuccessGenerateReport(s"뭔지는 모르겠지만 json 입니다. ${json}")
+        } yield SuccessGenerateReport(json.toString())
       ).catchAll(e => ZIO.succeed(FailGenerateReport(e)))
     }
 
     _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
-    _ <- Console.printLine(s"-------------")
 
-    // 패턴 매칭은 정적 타입 언어에서 사용할 수 있는 강력한 도구입니다. https://docs.scala-lang.org/ko/tour/pattern-matching.html
-    _ <- ZIO.foreachDiscard(reports) { report =>
-      report match {
-        case FailGenerateReport(error) =>
-          Console.printLine(s"생성 실패한 리포트 입니다: ${error}")
-        case SuccessGenerateReport(message) =>
-          Console.printLine(s"생성 성공한 리포트 입니다: ${message}")
-      }
+    messages = reports.collect {
+      case SimpleReport.SuccessGenerateReport(message) =>
+        message
+      case FailGenerateReport(cause) => ""
     }
+
+    friends <- ZIO
+      .attempt(
+        ujson
+          .read(messages.find(_.contains("friends")).get)
+          .obj
+          .get("friends")
+          .get
+          .toString()
+          .fromJson[Array[Friend]]
+          .right
+          .get
+      )
+      .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
+
+    _ <- ZIO.foreachDiscard(friends) { friend =>
+      Console.printLine(s"${friend.name}: ${friend.age} years old!")
+    }
+
+    average <- ZIO
+      .attempt(
+        friends.map(_.age).sum / friends.length
+      )
+      .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
+
+    _ <- Console.printLine(s"Average age of friends is $average!")
+
   } yield ()
 }
