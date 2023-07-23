@@ -7,6 +7,7 @@
 import FriendsAges.SimpleReport.{FailGenerateReport, SuccessGenerateReport}
 import ujson.Value.Value
 import zio._
+import zio.json._
 
 import java.io.Serializable
 
@@ -23,8 +24,17 @@ object SimpleError {
       extends SimpleError(s"friends를 찾지 못했어요: ", cause)
 }
 
-object FriendsAges extends ZIOAppDefault {
+case class Friend(
+    name: String,
+    age: Int,
+    hobbies: List[String],
+    location: String
+)
+object Friend {
+  implicit val decoder: JsonDecoder[Friend] = DeriveJsonDecoder.gen[Friend]
+}
 
+object FriendsAges extends ZIOAppDefault {
 
   // python처럼 쉽게 파일을 읽을 수 있는 라이브러리 https://github.com/com-lihaoyi/os-lib
   val path = os.pwd / "fixture"
@@ -64,12 +74,42 @@ object FriendsAges extends ZIOAppDefault {
       (
         for {
           json <- readJson(name)
-          age <- getAge(json)
-          _ = println(s"age = ${age}")
-        } yield age
-      ).catchAll(e => ZIO.attempt(List()))
+        } yield SuccessGenerateReport(json.toString())
+      ).catchAll(e => ZIO.succeed(FailGenerateReport(e)))
     }
-    ages = reports.flatten
-    _ = println(s"친구들의 나이 평균은 ${ages.sum / ages.length}")
+
+    _ <- Console.printLine(s"-------------")
+
+    messages = reports.collect {
+      case SimpleReport.SuccessGenerateReport(message) =>
+        message
+      case FailGenerateReport(cause) => ""
+    }
+
+    friends <- ZIO
+      .attempt(
+        ujson
+          .read(messages.find(_.contains("friends")).get)
+          .obj
+          .get("friends")
+          .get
+          .toString()
+          .fromJson[Array[Friend]]
+          .right
+          .get
+      )
+      .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
+
+    _ <- ZIO.foreachDiscard(friends) { friend =>
+      Console.printLine(s"${friend.name}: ${friend.age} years old!")
+    }
+
+    average <- ZIO
+      .attempt(
+        friends.map(_.age).sum / friends.length
+      )
+      .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
+
+    _ <- Console.printLine(s"Average age of friends is $average!")
   } yield ()
 }
