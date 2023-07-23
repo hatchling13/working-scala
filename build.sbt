@@ -81,3 +81,17 @@ lazy val `deepZIOExam` = project
   .settings(sharedSettings)
   .settings(
   )
+
+
+lazy val Forecast = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %% "os-lib" % "0.9.1",
+      "com.lihaoyi" %% "ujson" % "3.0.0",
+      "dev.zio" %% "zio-json" % "0.3.0-RC10",
+      "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M2",
+      "com.softwaremill.sttp.client4" %% "zio-json" % "4.0.0-M2",
+      "com.nrinaudo" %% "kantan.csv" % "0.7.0",
+    )
+  )

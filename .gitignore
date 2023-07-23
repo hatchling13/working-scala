@@ -1,0 +1,7 @@
+.bloop
+.metals
+.vscode
+cheese
+project
+**/target
+.env
