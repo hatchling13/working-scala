@@ -66,3 +66,16 @@ lazy val `read-file` = project
 
 lazy val `simple-jh` = project
   .settings(sharedSettings)
+
+lazy val `forecast` = project.dependsOn(`read-file`)
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "dev.zio" %% "zio" % zioVersion,
+      "com.lihaoyi" %% "ujson" % "3.0.0",
+      "com.softwaremill.sttp.client3" %% "core" % "3.8.16",
+      "com.softwaremill.sttp.client3" %% "zio-json" % "3.3.9",
+      "dev.zio" %% "zio-http" % "3.0.0-RC2",
+      "org.scalameta" %% "scalafmt-core" % "2.7.5"
+    )
+  )
