@@ -69,6 +69,8 @@ lazy val `read-file` = project
     )
   )
 
+lazy val `modeling-youtube` = project.settings(sharedSettings)
+
 lazy val `cheese` = project
   .settings(sharedSettings)
   .settings(

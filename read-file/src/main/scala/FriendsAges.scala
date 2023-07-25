@@ -74,12 +74,42 @@ object FriendsAges extends ZIOAppDefault {
       (
         for {
           json <- readJson(name)
-          age <- getAge(json)
-          _ = println(s"age = ${age}")
-        } yield age
-      ).catchAll(e => ZIO.attempt(List()))
+        } yield SuccessGenerateReport(json.toString())
+      ).catchAll(e => ZIO.succeed(FailGenerateReport(e)))
     }
-    ages = reports.flatten
-    _ = println(s"친구들의 나이 평균은 ${ages.sum / ages.length}")
+
+    _ <- Console.printLine(s"-------------")
+
+    messages = reports.collect {
+      case SimpleReport.SuccessGenerateReport(message) =>
+        message
+      case FailGenerateReport(cause) => ""
+    }
+
+    friends <- ZIO
+      .attempt(
+        ujson
+          .read(messages.find(_.contains("friends")).get)
+          .obj
+          .get("friends")
+          .get
+          .toString()
+          .fromJson[Array[Friend]]
+          .right
+          .get
+      )
+      .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
+
+    _ <- ZIO.foreachDiscard(friends) { friend =>
+      Console.printLine(s"${friend.name}: ${friend.age} years old!")
+    }
+
+    average <- ZIO
+      .attempt(
+        friends.map(_.age).sum / friends.length
+      )
+      .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
+
+    _ <- Console.printLine(s"Average age of friends is $average!")
   } yield ()
 }
