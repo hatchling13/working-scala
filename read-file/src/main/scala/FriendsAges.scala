@@ -7,6 +7,7 @@
 import FriendsAges.SimpleReport.{FailGenerateReport, SuccessGenerateReport}
 import ujson.Value.Value
 import zio._
+import zio.json._
 
 import java.io.Serializable
 
@@ -23,8 +24,17 @@ object SimpleError {
       extends SimpleError(s"friends를 찾지 못했어요: ", cause)
 }
 
-object FriendsAges extends ZIOAppDefault {
+case class Friend(
+    name: String,
+    age: Int,
+    hobbies: List[String],
+    location: String
+)
+object Friend {
+  implicit val decoder: JsonDecoder[Friend] = DeriveJsonDecoder.gen[Friend]
+}
 
+object FriendsAges extends ZIOAppDefault {
 
   // python처럼 쉽게 파일을 읽을 수 있는 라이브러리 https://github.com/com-lihaoyi/os-lib
   val path = os.pwd / "fixture"
