@@ -42,7 +42,8 @@ lazy val `http-server` = project
   .settings(sharedSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio-http" % "3.0.0-RC2"
+      "dev.zio" %% "zio-http" % "3.0.0-RC2",
+      "dev.zio" %% "zio-json" % "0.5.0",
     )
   )
 
@@ -83,3 +84,11 @@ lazy val `deepZIOExam` = project
   .settings(sharedSettings)
   .settings(
   )
+
+lazy val `cookingInfo` = project.settings(
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.client3" %% "core" % "3.8.16",
+    "com.softwaremill.sttp.client3" %% "zio-json" % "3.8.16",
+    "dev.zio" %% "zio-json" % "0.5.0"
+  )
+)
