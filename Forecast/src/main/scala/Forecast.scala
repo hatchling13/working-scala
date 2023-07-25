@@ -11,7 +11,7 @@ import java.io.File
 object DiscordWebhook extends ZIOAppDefault {
 
     // 기본적인 csv 파일의 경로와 API 키를 설정합니다.
-    private val csvPath = "../Forecast/src/main/scala/api.csv"
+    private val csvPath = "../fixture/region_data.csv"
     private val weatherAPI = "WEATHER_API"
     private val discord = "DISCORD_WEBHOOK_KEY"
 
@@ -57,8 +57,7 @@ object DiscordWebhook extends ZIOAppDefault {
     // 날짜와 시간을 포맷팅하는 함수입니다. 포멧팅 형식은 다음과 같습니다.
     // 날짜: YYYY-MM-DD, 시간: HH:MM
     //
-    // 예를 들어, 20210801을 2021-08-01로, 0200을 02:00으로 변환합니다.
-    // 따라서 출력되는 값은 2021-08-01, 02:00입니다.
+    // 예를 들어, 20210801은 각각 2021-08-01, 0200을 02:00으로 변환한 뒤 `2021-08-01, 02:00` 형식으로 반환합니다.
     def formatDate(date: String): String = {
         val year = date.substring(0, 4)
         val month = date.substring(4, 6)
@@ -72,28 +71,32 @@ object DiscordWebhook extends ZIOAppDefault {
         s"$hour:$minute"
     }
 
-    // 날씨 API에서 가져온 JSON 객체를 파싱하는 함수입니다.
-    // TODO: refactor this function
+    def parseItem(item: ujson.Value, regionMap: Map[(String, String), String]): String = {
+        val category = getKeyFromJson(item, "category").map(getWeatherStatus).getOrElse("Unknown Category")
+        val fcstDate = getKeyFromJson(item, "fcstDate").map(formatDate).getOrElse("Empty Date")
+        val fcstTime = getKeyFromJson(item, "fcstTime").map(formatTime).getOrElse("Empty Time")
+        val fcstValue = getKeyFromJson(item, "fcstValue").getOrElse("Empty Value")
+        val nx = getFromJsonInt(item, "nx").getOrElse(0)
+        val ny = getFromJsonInt(item, "ny").getOrElse(0)
+        val region = regionMap.getOrElse((nx.toString(), ny.toString()), "Unknown region")
+
+        s"지역(동): $region, 카테고리: $category, 날짜: $fcstDate, 시간: $fcstTime, 강수 정보: ${getRainStatus(fcstValue)}"
+    }
+
     def getWeatherInfo(json: Value, regionMap: Map[(String, String), String]) =
-    ZIO.fromOption(json.obj.get("response"))
-        .flatMap(response => ZIO.fromOption(response.obj.get("body")))
-        .flatMap(body => ZIO.fromOption(body.obj.get("items")))
-        .flatMap(items => ZIO.fromOption(items.obj.get("item").collect {
-            case ujson.Arr(itemArray) => itemArray
-        }))
-        .map(items => items.map(item => {
-            val category = getKeyFromJson(item, "category").map(getWeatherStatus).getOrElse("Unknown Category")
-            val fcstDate = getKeyFromJson(item, "fcstDate").map(formatDate).getOrElse("")
-            val fcstTime = getKeyFromJson(item, "fcstTime").map(formatTime).getOrElse("")
-            val fcstValue = getKeyFromJson(item, "fcstValue").getOrElse("")
-            val nx = getFromJsonInt(item, "nx").getOrElse(0)
-            val ny = getFromJsonInt(item, "ny").getOrElse(0)
-            val region = regionMap.getOrElse((nx.toString(), ny.toString()), "Unknown region")
-            s"지역(동): $region, 카테고리: $category, 날짜: $fcstDate, 시간: $fcstTime, 강수 정보: ${getRainStatus(fcstValue)}"
-        // `.take`는 `ZIO`의 메서드로, `ZIO`의 결과를 가져올 때 사용합니다.
-        }).take(5))
-        .map(_.mkString("\n"))
-        .orElseFail(new Exception("item array not found or invalid"))
+        for {
+            response <- ZIO.fromOption(json.obj.get("response")).mapError(_ => "response not found in json")
+            body <- ZIO.fromOption(response.obj.get("body")).mapError(_ => "body not found in json")
+            items <- ZIO.fromOption(body.obj.get("items")).mapError(_ => "items not found in json")
+            
+            itemArray <- ZIO.fromOption(items.obj.get("item").collect {
+                case ujson.Arr(itemArray) => itemArray
+            }).mapError(_ => "item array not found or invalid")
+        // `take`는 `Iterable`을 구현한 클래스(List, Array, Vector 등)에서 사용할 수 있는 메서드입니다.
+        // 여기서는 `map`에서 변환된 `itemArray`가 `Iterable`을 구현한 클래스이기 때문에 사용할 수 있습니다.
+        //
+        // `take(n)`은 `Iterable`에서 앞에서부터 `n`개의 요소를 가져옵니다.
+        } yield itemArray.take(5).map(item => parseItem(item, regionMap)).mkString("\n")
 
     // 날씨 API에서 가져온 카테고리를 변환하는 함수입니다.
     // 예를 들어, `LGT`는 `낙뢰`로, `PTY`는 `강수형태`로 변환합니다.
@@ -119,16 +122,20 @@ object DiscordWebhook extends ZIOAppDefault {
         json <- readJson(response)
         weatherData <- getWeatherInfo(json, regionMap)
     } yield weatherData
-
+    
     def sendToDiscord(weatherData: String) = {
         val requestPayload = RequestPayload(weatherData)
-        val response: Identity[Response[Either[ResponseException[String, String], ResponsePayload]]] =
-            basicRequest
-                .post(uri"$discord")
-                .body(requestPayload)
-                .response(asJson[ResponsePayload])
-                .send(backend)
-        ZIO.fromEither(response.body)
+            // ref: https://zio.dev/reference/core/zio/#from-side-effects
+            ZIO.attempt {
+                val response: Identity[Response[Either[ResponseException[String, String], ResponsePayload]]] =
+                    basicRequest
+                        .post(uri"$discord")
+                        .body(requestPayload)
+                        .response(asJson[ResponsePayload])
+                        .send(backend)
+
+                response.body
+            }.flatMap(ZIO.fromEither(_))
     }
 
     // CSV 파일에서 지역 정보를 가져오는 함수입니다.
@@ -155,7 +162,16 @@ object DiscordWebhook extends ZIOAppDefault {
 // 지역 정보를 처리하기 위한 클래스입니다.
 case class RegionData(nx: String, ny: String, dong: String)
 
-// 지역 정보를 CSV 파일에서 읽어오기 위한 코드입니다.
+// 지역 정보를 CSV 파일에서 읽어오기 위한 Decoder입니다.
 object RegionData {
+    // `implicit` 키워드를 사용하여 `HeaderDecoder` 타입의 implicit 변수를 선언하였습니다. 이를 통해 필요한 경우 컴파일러가 자동으로 이 디코더를 찾아 사용할 수 있습니다.
+    //
+    // 이 변수는 `kantan.csv` 라이브러리가 CSV 파일을 `RegionData` 객체로 디코딩하는 데 사용됩니다.
+    // 하지만 `implicit`를 사용했기 때문에 `RegionData` 객체를 직접 디코딩하는 코드를 작성하지 않아도 컴파일러가 알아서 적절한 디코딩 로직을 찾아 사용하게 됩니다.
+    //
+    // `implicit`은 변환기(converter), 매개변수 값 주입기(parameter value injector), 확장 메서드(extension method) 등의 역할을 할 수 있습니다.
+    // 여기서는 매개변수 값 주입기의 역할을 하며, 컴파일러가 필요한 매개변수를 찾을 때 이 `implicit` 값을 사용하게 됩니다.
+    //
+    // ref: https://stackoverflow.com/questions/10375633/understanding-implicit-in-scala
     implicit val headerDecoder: HeaderDecoder[RegionData] = HeaderDecoder.decoder("격자 X", "격자 Y", "3단계")(RegionData.apply _)
 }
