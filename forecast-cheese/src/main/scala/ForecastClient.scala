@@ -25,7 +25,7 @@ object ForecastClient extends ZIOAppDefault{
             _ <- ZIO.unit
             body = getApiResponse(region.forecastApiUrl(today, now)).body
             json <- readJson(body).mapError(SimpleError.ReadFail)
-            items = getItemsFromJson(json)
+            items <- getItemsFromJson(json)
             message = s"> **${region.name} 날씨($today)** \n$items"
           } yield message
       }
@@ -57,11 +57,18 @@ object ForecastClient extends ZIOAppDefault{
         .catchAll(cause => ZIO.fail(SimpleError.ReadFail(cause)))
     } yield json
 
-  def getItemsFromJson(json: Value): String = {
-    json("response")("body")("items")("item").arr
-      .filter(el => el.obj("category").str == "RN1")
-      .map(item => s"> ${item.obj("fcstTime").str} : ${item.obj("fcstValue").str} \n")
-      .mkString
+  def getItemsFromJson(json: Value): ZIO[Any, Throwable, String] = {
+    ZIO.attempt {
+      val items = json("response")("body")("items")("item").arr
+      items
+        .filter(item => item.obj("category").str == "RN1")
+        .map(item => convertItemToMessage(item))
+        .mkString
+    }.catchAll(_ => {ZIO.succeed("> 정보 없음\n")})
+  }
+
+  def convertItemToMessage(item: Value): String = {
+    s"> ${item.obj("fcstTime").str.substring(0, 2)}시 : ${item.obj("fcstValue").str} \n"
   }
 
   def sendDiscordMessage(message: String): ZIO[Any, Exception, Identity[Response[Either[ResponseException[String, String], ResponsePayload]]]] = {
