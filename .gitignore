@@ -1,3 +1,14 @@
+target
+forecast/target
+http-client/target
+http-server/target
+project/target
+read-file/target
+simple-jh/target
+tapir-with-zio-http/target
+zio-json/target
+*.conf
+
 *.DS_Store
 *.class
 *.log
