@@ -1,5 +1,6 @@
 import zio._
 import zio.http.{ZClient, _}
+import zio.json._
 
 import java.io.IOException
 
@@ -27,7 +28,8 @@ object ServerExample extends ZIOAppDefault {
       case req @ Method.POST -> Root / "client-test" =>
         for {
           _ <- zio.Console.printLine("client-test")
-          _ <- zio.Console.printLine(req.body)
+          reqList <- req.body.asString.map(_.fromJson[List[Dish]])
+          _ <- zio.Console.printLine(reqList)
           res <- ZIO.succeed(Response.text("HELLO!"))
 //          res <- ZIO.succeed(Response.text(
 //            """
@@ -51,6 +53,26 @@ object ServerExample extends ZIOAppDefault {
       extends Notification
 
   case class Board(title: String, txt: String, notification: List[Notification])
+
+  case class Dish(name: String, ingredients: List[String], country: Country)
+
+  object Dish {
+    implicit val decoder: JsonDecoder[Dish] = DeriveJsonDecoder.gen[Dish]
+    implicit val encoder: JsonEncoder[Dish] = DeriveJsonEncoder.gen[Dish]
+  }
+
+  sealed trait Country
+
+  object Country {
+    implicit val decoder: JsonDecoder[Country] = DeriveJsonDecoder.gen[Country]
+    implicit val encoder: JsonEncoder[Country] = DeriveJsonEncoder.gen[Country]
+  }
+
+  case class Korean() extends Country
+
+  case class Japanese() extends Country
+
+  case class Chinese() extends Country
 
   //    _ <- zio.Console.printLine("")
   //    b = Board(
