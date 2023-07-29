@@ -128,3 +128,15 @@ lazy val `forecast-subway` = project
       "dev.zio" %% "zio-json" % "0.5.0"
     )
   )
+
+
+lazy val `sample-db` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
+      "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
+      "org.xerial" % "sqlite-jdbc" % "3.40.1.0",
+      "org.postgresql" % "postgresql" % "42.5.4",
+    )
+  )
