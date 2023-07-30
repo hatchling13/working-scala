@@ -37,7 +37,7 @@ object DBSampleApp extends ZIOAppDefault {
     val name = "postgres"
     val user = "postgres"
     val password = "1234"
-    s"jdbc:postgresql://$path/$name?user$user=&password=$password"
+    s"jdbc:postgresql://$path/$name?user=$user&password=$password"
   }
 
   private val conn = ZLayer(
