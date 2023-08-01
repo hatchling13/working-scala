@@ -141,6 +141,7 @@ lazy val `sample-db` = project
     )
   )
 
+
 lazy val `bicycle_db` = project
   .settings(sharedSettings)
   .settings(
@@ -148,5 +149,17 @@ lazy val `bicycle_db` = project
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
       "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
       "org.postgresql" % "postgresql" % "42.5.4",
+      "dev.zio" %% "zio-http" % "3.0.0-RC2"
     )
   ) 
+
+lazy val `sample-db-taste-review` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
+      "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
+      "org.postgresql" % "postgresql" % "42.5.4",
+      "dev.zio" %% "zio-http" % "3.0.0-RC2"
+    )
+  )
