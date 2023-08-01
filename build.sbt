@@ -147,7 +147,6 @@ lazy val `bicycle_db` = project
     libraryDependencies ++= Seq(
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
       "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
-      "org.xerial" % "sqlite-jdbc" % "3.40.1.0",
       "org.postgresql" % "postgresql" % "42.5.4",
     )
   ) 
