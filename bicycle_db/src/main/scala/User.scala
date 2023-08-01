@@ -6,15 +6,6 @@ import doobie.implicits._
 import bicycle_db.UsersTableRow
 import zio.ZIO
 
-/*
-```docker
-CREATE TABLE users (
-id text NOT NULL,
-password text,
-balance integer,
-PRIMARY KEY (id)
-);
-*/
 case class User(id: String, password: String, var balance: Int)
 
 class UserServices(db: Database) {

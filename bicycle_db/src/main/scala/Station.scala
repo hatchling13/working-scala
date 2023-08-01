@@ -6,14 +6,6 @@ import doobie.implicits._
 import zio.ZIO
 import bicycle_db.StationTableRow
 
-/*
-```docker
-CREATE TABLE station (
-stationId integer NOT NULL,
-availableBikes integer,
-PRIMARY KEY (stationId)
-);
-*/
 case class Station(stationId: Int, var availableBikes: Int)
 
 class StationServices(db: Database) {
