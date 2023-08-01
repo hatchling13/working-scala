@@ -36,6 +36,7 @@ class RentalRecordServices(db: Database) {
                 (fr"select userId, stationId, endStation, rentalTime, cost from rental_record limit 10").query[RentalRecordRow].to[List]
             }
         } yield res)
+
         _ <- zio.Console.printLine(rentalRecordInfo)
     } yield ()
 

@@ -3,9 +3,6 @@ package bicycle_db
 import io.github.gaelrenoux.tranzactio.ConnectionSource
 import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio._
-import doobie._
-import doobie.implicits._
-import java.sql.DriverManager
 
 import com.bicycle_db.BicycleRentalService
 import com.bicycle_db.UserServices
@@ -42,34 +39,54 @@ object BicycleRentalApp extends ZIOAppDefault {
         // _ <- stationService.insertStationTableRow(StationTableRow(123, 10)) // start station
         // _ <- rentalRecordService.insertStationTableRow(StationTableRow(456, 10)) // end station
 
-        // login the user
+        // login system
         _ <- Console.printLine("Enter your user id: ")
         userId <- Console.readLine
         _ <- Console.printLine("Enter your password: ")
         password <- Console.readLine
+
+        // check if the user is verified or not. if not, fail the program
         isVerified <- rentalService.verifyUser(userId, password)
-        _ <- if (isVerified) Console.printLine("Log in") else Console.printLine("Can't find user").orDie
+        _ <- if (isVerified) 
+                Console.printLine("Log in") 
+            else 
+                ZIO.fail("Can't find user")
 
         // rent a bicycle
         _ <- Console.printLine("Enter the station id: ")
         stationId <- Console.readLine
-        isAvailableToRent <- rentalService.checkBikeAvailability(stationId)
-
-        _ <- Console.printLine("Enter the rental time: ")
-        rentalTime <- Console.readLine
-        rentalCost = rentalService.calculateRentalCost(rentalTime.toInt)
-    } yield (rentalCost)
+        isAvailable <- rentalService.checkBikeAvailability(stationId)
+        // if `isAvailable`, then get `rentTime` and proceed to rent a bicycle
+        // else, fail the program
+        _ <- if (isAvailable) {
+                for {
+                    _ <- Console.printLine("Enter the rental time: ")
+                    rentalTime <- Console.readLine
+                    rentalCost = rentalService.calculateRentalCost(rentalTime.toInt)
+                    _ <- rentalService.rentBike(userId, stationId.toInt, rentalTime.toInt)
+                    _ <- Console.printLine(s"Your rental cost is $rentalCost")
+                } yield ()
+            } else {
+                ZIO.fail("No available bikes")
+            }
+        
+        // return a bicycle
+        _ <- Console.printLine("Enter the station id: ")
+        returnStationId <- Console.readLine
+        _ <- rentalService.returnBike(userId, returnStationId.toInt)
+        _ <- Console.printLine("Bike has returned. Thank you for using our service!")
+    } yield ()
 
     override def run = prog.provide(
         conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
     )
 
-    // TODO should not be hardcoded
+    // docker run -p 5400:5400 --name bicycle -e POSTGRES_PASSWORD=<password> -d postgres
     val postgres = locally {
         val path = "localhost:5432"
         val name = "rental_service"
-        val user = "notjoon"
-        val password = "1q2w3e4r"
+        val user = ???
+        val password = ???
 
         s"jdbc:postgresql://$path/$name?user=$user&password=$password"
     }
@@ -82,6 +99,4 @@ object BicycleRentalApp extends ZIOAppDefault {
         )
     )
 }
-
-// docker run -p 5400:5400 --name bicycle -e POSTGRES_PASSWORD=1q2w3e4r -d postgres
 

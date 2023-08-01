@@ -25,7 +25,7 @@ class BicycleRentalService(db: Database) {
             (fr"UPDATE station SET availableBicycles = availableBikes - 1 WHERE stationId =" ++ fr"$stationId").update.run
         }
 
-        db.transactionOrWiden(rentBicycleQuery)
+        db.transactionOrWiden(rentBicycleQuery).mapError(fromSqlException)
     }
 
     def returnBike(userId: String, returnStationId: Int): ZIO[Any, Throwable, Int] = {
@@ -34,7 +34,7 @@ class BicycleRentalService(db: Database) {
             (fr"UPDATE station SET availableBikes = availableBikes + 1 WHERE stationId =" ++ fr"$returnStationId").update.run
         }
 
-        db.transactionOrWiden(returnBikeQuery)
+        db.transactionOrWiden(returnBikeQuery).mapError(fromSqlException)
     }
 
     def checkBikeAvailability(stationId: String): ZIO[Any, Throwable, Boolean] = {
@@ -42,7 +42,7 @@ class BicycleRentalService(db: Database) {
             (fr"SELECT EXISTS (SELECT * FROM station WHERE stationId =" ++ fr"$stationId" ++ fr"AND availableBikes > 0)").query[Boolean].unique
         }
 
-        db.transactionOrWiden(checkBikeAvailabilityQuery)
+        db.transactionOrWiden(checkBikeAvailabilityQuery).mapError(fromSqlException)
     }
 
     def calculateRentalCost(rentalTime: Int): Int = {
@@ -56,6 +56,6 @@ class BicycleRentalService(db: Database) {
             (fr"SELECT EXISTS (SELECT * FROM users WHERE id =" ++ fr"$userId" ++ fr"AND password =" ++ fr"$password)").query[Boolean].unique
         }
 
-        db.transactionOrWiden(verifyUserQuery)
+        db.transactionOrWiden(verifyUserQuery).mapError(fromSqlException)
     }
 }

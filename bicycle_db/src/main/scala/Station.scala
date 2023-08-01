@@ -10,7 +10,6 @@ import bicycle_db.StationTableRow
 ```docker
 CREATE TABLE station (
 stationId integer NOT NULL,
-stationName text,
 availableBikes integer,
 PRIMARY KEY (stationId)
 );
@@ -23,7 +22,7 @@ class StationServices(db: Database) {
             (fr"insert into station (stationId, availableBikes) values (" ++ fr"${row.stationId}," ++ fr"${row.availableBicycles})").update.run
         }
 
-        db.transactionOrWiden(insertStationTableQuery)
+        db.transactionOrWiden(insertStationTableQuery).mapError(e => new Exception(e.getMessage))
     }
 
     def fetchAndPrintStationData(db: Database): ZIO[Any, Throwable, Unit] = for {
@@ -32,6 +31,7 @@ class StationServices(db: Database) {
                 (fr"select stationId, availableBikes from station limit 10").query[StationTableRow].to[List]
             }
         } yield res)
+
         _ <- zio.Console.printLine(stationInfo)
     } yield ()
 
@@ -41,6 +41,6 @@ class StationServices(db: Database) {
         }
 
         val db = ZIO.service[Database]
-        db.flatMap(database => database.transactionOrWiden(deleteAllStationsQuery))
+        db.flatMap(database => database.transactionOrWiden(deleteAllStationsQuery).mapError(e => new Exception(e.getMessage)))
     }
 }

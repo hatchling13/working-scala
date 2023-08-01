@@ -23,7 +23,7 @@ class UserServices(db: Database) {
             (fr"insert into users (id, password, balance) values (" ++ fr"${row.userId}," ++ fr"${row.password}," ++ fr"${row.balance})").update.run
         }
 
-        db.transactionOrWiden(insertUserTableQuery)
+        db.transactionOrWiden(insertUserTableQuery).mapError(e => new Exception(e.getMessage))
     }
 
     def fetchAndPrintUserData(db: Database): ZIO[Any, Throwable, Unit] = for {
@@ -41,6 +41,6 @@ class UserServices(db: Database) {
         }
 
         val db = ZIO.service[Database]
-        db.flatMap(database => database.transactionOrWiden(deleteAllUsersQuery))
+        db.flatMap(database => database.transactionOrWiden(deleteAllUsersQuery).mapError(e => new Exception(e.getMessage)))
     }
 }
