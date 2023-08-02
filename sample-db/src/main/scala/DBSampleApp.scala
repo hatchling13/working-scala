@@ -8,9 +8,20 @@ case class TestTableRow(name: String, hobby: String)
 
 object DBSampleApp extends ZIOAppDefault {
 
+  def insertTableRow(row: TestTableRow): ZIO[Database, Throwable, Int] = {
+    val insertQuery = tzio {
+      sql"""|insert into test_table (name, hobby)
+            |values (${row.name}, ${row.hobby})""".stripMargin.update.run
+    }
+
+    val db = ZIO.service[Database]
+    db.flatMap(database => database.transactionOrWiden(insertQuery))
+  }
+
   val prog = for {
     _ <- ZIO.unit
     database <- ZIO.service[Database]
+    _ <- insertTableRow(TestTableRow("John", "Skiing"))
     rows <- database
       .transactionOrWiden(for {
         res <- tzio {
@@ -36,8 +47,8 @@ object DBSampleApp extends ZIOAppDefault {
     val path = "localhost:5432"
     val name = "postgres"
     val user = "postgres"
-    val password = "1234"
-    s"jdbc:postgresql://$path/$name?user$user=&password=$password"
+    val password = "1q2w3e4r"
+    s"jdbc:postgresql://$path/$name?user=$user&password=$password"
   }
 
   private val conn = ZLayer(
