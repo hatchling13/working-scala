@@ -83,6 +83,14 @@ lazy val `cheese` = project
 lazy val `deepZIOExam` = project
   .settings(sharedSettings)
   .settings(
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.client3" %% "core" % "3.8.16",
+      "com.softwaremill.sttp.client3" %% "zio-json" % "3.8.16",
+      "dev.zio" %% "zio-json" % "0.5.0",
+      "com.lihaoyi" %% "os-lib" % "0.9.1",
+      "com.lihaoyi" %% "ujson" % "3.0.0",
+      "dev.zio" %% "zio-http" % "3.0.0-RC2",
+    )
   )
 
 lazy val `cookingInfo` = project.settings(
@@ -141,6 +149,29 @@ lazy val `sample-db` = project
     )
   )
 
+
+lazy val `bicycle_db` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
+      "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
+      "org.postgresql" % "postgresql" % "42.5.4",
+      "dev.zio" %% "zio-http" % "3.0.0-RC2"
+    )
+  )
+
+lazy val `sample-db-taste-review` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
+      "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
+      "org.postgresql" % "postgresql" % "42.5.4",
+      "dev.zio" %% "zio-http" % "3.0.0-RC2"
+    )
+  )
+
 lazy val `tabling` = project
   .settings(sharedSettings)
   .settings(
@@ -151,3 +182,4 @@ lazy val `tabling` = project
       "org.postgresql" % "postgresql" % "42.5.4",
     )
   )
+
