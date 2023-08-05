@@ -1,82 +1,44 @@
 import io.github.gaelrenoux.tranzactio.ConnectionSource
 import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
-import zio._
-import doobie._
 import doobie.implicits._
+import doobie._
+import zio._
+import zio.{Console}
+import DiaryService._
+import PostgresConnection.conn
 
-// 1 . datagrip을 통해서 table setting
-// 2. 간단한 update, delete query를 날리는 로직을 작성한다.
-// 3. 유저의 입력은 readLine으로 받아서 변수에 담음
-// 4. ${변수명} 쿼리
-// 5. CRUD 구현
-
-case class Mood(name: String, score: Int)
-
+// 하나 삭제
+// 하나 수정
+// 끝내기?
+case class Action(number:String)
 object DoobieApp extends ZIOAppDefault {
-    def validateInput(score: Int) =
-        score match {
-        case 10 => Mood("GOOD", 10)
-        case 5 => Mood("SOSO", 5)
-        case 0 => Mood("BAD", 0)
-        case _ => Mood("NONE", -1)
-  }
+  val selectAction =
+    for{
+    _ <- Console.printLine(
+      """
+      원하는 행동을 번호로 입력해주세요.
+      _________________________________
+      [1] 오늘의 기분 입력하기
+      [2] 기록한 기분 수정하기
+      [3] 기록한 기분 삭제하기
+      [4] 지금까지 기록한 기분 보기
+      """)
+      input <- Console.readLine("번호로 입력 :")
+      action <- input match {
+        case "1" => addTodayMood
+        case "2" => modifyMood
+        case "3" => deleteMood
+        case "4" => getAllMoods
+        case _ => ZIO.fail("잘못 입력하셨습니다.")
+      } 
 
+  } yield(action)
 
-  val prog = for {
-    _ <- ZIO.unit
-    database <- ZIO.service[Database]
-    rows <- database
-      .transactionOrWiden(for {
-        _ <- tzio {
-          deleteAllMood()
-        }
-        _ <- tzio {
-          insertMood("SOSO", 5)
-        }
-        res <- tzio {
-          sql"""|select name, score
-                |from "DailyNotes".mood""".stripMargin
-            .query[Mood]
-            .to[List]
-        }
-      } yield res)
+  val main = selectAction
+  
 
-    _ <- zio.Console.printLine(rows)
-
-  } yield ()
-
-  def insertMood(name: String, score: Int) =
-  sql"""insert into "DailyNotes".mood (name, score) values ($name, $score)""".update.run
-
-
-  def deleteAllMood() =
-  sql"""DELETE FROM "DailyNotes".mood """.update.run
-
-  override def run = prog.provide(
+  override def run = main.provide(
     conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
   )
 
-  // val sqlite = locally {
-  //   val path = "identifier.sqlite"
-  //   s"jdbc:sqlite:$path"
-  // }
-  val postgres = locally {
-    val path = "localhost:5433"
-    val name = "postgres"
-    val user = "postgres"
-    val password = "1q2w3e4r"
-    s"jdbc:postgresql://$path/$name?user=$user&password=$password"
-  }
-
-  val driver = "org.postgresql.Driver"
-
-  Class.forName(driver)
-
-  private val conn = ZLayer(
-    ZIO.attempt(
-      java.sql.DriverManager.getConnection(
-        postgres
-      )
-    )
-  )
 }
