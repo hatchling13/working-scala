@@ -27,6 +27,12 @@ object DoobieApp extends ZIOAppDefault {
     database <- ZIO.service[Database]
     rows <- database
       .transactionOrWiden(for {
+        _ <- tzio {
+          deleteAllMood()
+        }
+        _ <- tzio {
+          insertMood("SOSO", 5)
+        }
         res <- tzio {
           sql"""|select name, score
                 |from "DailyNotes".mood""".stripMargin
@@ -39,8 +45,12 @@ object DoobieApp extends ZIOAppDefault {
 
   } yield ()
 
-  // def insert1(name: String, age: Option[Short]) =
-  // sql"insert into person (name, age) values ($name, $age)".update.run
+  def insertMood(name: String, score: Int) =
+  sql"""insert into "DailyNotes".mood (name, score) values ($name, $score)""".update.run
+
+
+  def deleteAllMood() =
+  sql"""DELETE FROM "DailyNotes".mood """.update.run
 
   override def run = prog.provide(
     conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
