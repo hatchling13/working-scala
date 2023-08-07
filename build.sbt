@@ -76,7 +76,12 @@ lazy val `cheese` = project
   .settings(sharedSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio-http" % "3.0.0-RC2"
+      "com.softwaremill.sttp.client3" %% "core" % "3.8.16",
+      "com.softwaremill.sttp.client3" %% "zio-json" % "3.8.16",
+      "dev.zio" %% "zio-json" % "0.5.0",
+      "com.lihaoyi" %% "os-lib" % "0.9.1",
+      "com.lihaoyi" %% "ujson" % "3.0.0",
+      "dev.zio" %% "zio-http" % "3.0.0-RC2",
     )
   )
 
