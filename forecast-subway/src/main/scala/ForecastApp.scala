@@ -1,4 +1,3 @@
-
 import zio._
 // 시스템 시간 API (JAVA ^8)
 import java.time.LocalDateTime
@@ -14,12 +13,16 @@ import sttp.model.UriInterpolator
 // // https://sttp.softwaremill.com/en/stable/json.html?highlight=json#zio-json
 import ujson.Value.Value
 
-
-abstract class SimpleError(message: String = "", cause: Throwable = null) extends Throwable(message, cause) with Product with Serializable
+abstract class SimpleError(message: String = "", cause: Throwable = null)
+    extends Throwable(message, cause)
+    with Product
+    with Serializable
 
 object SimpleError {
-  final case class ReadFail(cause: Throwable) extends SimpleError(s"read fail: ", cause)
-  final case class FindDataFail(cause: Throwable) extends SimpleError(s"찾지 못했어요", cause)
+  final case class ReadFail(cause: Throwable)
+      extends SimpleError(s"read fail: ", cause)
+  final case class FindDataFail(cause: Throwable)
+      extends SimpleError(s"찾지 못했어요", cause)
 }
 
 object ForecastApp extends ZIOAppDefault {
@@ -28,7 +31,7 @@ object ForecastApp extends ZIOAppDefault {
     val parsedName = name match {
       case "serviceKey" => ZIO.succeed(name)
       case "webhookKey" => ZIO.succeed(name)
-      case _ => ZIO.fail(name)
+      case _            => ZIO.fail(name)
     }
     parsedName.map(validName => System.property(validName))
   }
@@ -39,9 +42,10 @@ object ForecastApp extends ZIOAppDefault {
   // val b = ZIOserviceKey.flatten.flatMap(x=> ZIO.fromOption(x))
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
-
     for {
-      serviceKey <- ZIOserviceKey.flatMap(x => x.flatMap(y => ZIO.fromOption(y)))
+      serviceKey <- ZIOserviceKey.flatMap(x =>
+        x.flatMap(y => ZIO.fromOption(y))
+      )
 
       _ <- zio.Console.printLine("main")
       weatherJsonString = getWeatherData(serviceKey)
@@ -52,7 +56,9 @@ object ForecastApp extends ZIOAppDefault {
 
       // PTY는 강수형태를 의미합니다(Open API 가이드 문서 부록 참조(16p)
       ptyValue <- findByCategory(weatherJson, "PTY")
-      _ = sendDiscordMessage(createMessage(convertPtscValue(ptyValue("fcstValue").value.toString())))
+      _ = sendDiscordMessage(
+        createMessage(convertPtscValue(ptyValue("fcstValue").value.toString()))
+      )
     } yield ()
 
   def convertPtscValue(value: String): String = {
@@ -64,15 +70,22 @@ object ForecastApp extends ZIOAppDefault {
       case "5" => "빗방울"
       case "6" => "빗방울/눈날림"
       case "7" => "눈날림"
-      case _ => "알수없음"
+      case _   => "알수없음"
     }
   }
 
   // 기상청 Open API로 요청을 날려서 받은 JSON Response를 특정 카테고리만 filter 해주는 함수
-  def findByCategory(json: Value, category: String): ZIO[Any, SimpleError, Value] = {
-    ZIO.attempt(
-      json("response")("body")("items")("item").arr.filter(item => item("category").str == category).head
-    ).catchAll(x => ZIO.fail(SimpleError.FindDataFail(x)))
+  def findByCategory(
+      json: Value,
+      category: String
+  ): ZIO[Any, SimpleError, Value] = {
+    ZIO
+      .attempt(
+        json("response")("body")("items")("item").arr
+          .filter(item => item("category").str == category)
+          .head
+      )
+      .catchAll(x => ZIO.fail(SimpleError.FindDataFail(x)))
   }
 
   // Discord Message 생성 함수
@@ -94,15 +107,19 @@ object ForecastApp extends ZIOAppDefault {
   def getWeatherData(serviceKey: String): String = {
     // 하루 8번 날씨가 update되므로 최소 간격인 3시간으로 설정
     val now = LocalDateTime.now().minusHours(3)
-    val date = now.getYear.toString + pad2(now.getMonth.getValue) + pad2(now.getDayOfMonth)
+    val date = now.getYear.toString + pad2(now.getMonth.getValue) + pad2(
+      now.getDayOfMonth
+    )
     val hour = pad2(now.getHour)
     val minute = pad2(now.getMinute)
-    val uri = s"http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${serviceKey}&dataType=JSON&numOfRows=1000&pageNo=1&base_date=${date}&base_time=${hour}${minute}&nx=60&ny=126"
+    val uri =
+      s"http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${serviceKey}&dataType=JSON&numOfRows=1000&pageNo=1&base_date=${date}&base_time=${hour}${minute}&nx=60&ny=126"
     print(uri, "uri")
     basicRequest
       .get(uri"${uri}")
       .send(HttpClientSyncBackend())
-      .body.getOrElse("{}")
+      .body
+      .getOrElse("{}")
   }
 
   // JAVA.time format과 기상청 Open API 시간 format이 달라 padding 처리를 해주는 함수
@@ -129,16 +146,21 @@ object ForecastApp extends ZIOAppDefault {
     val backend = HttpClientSyncBackend()
 
     for {
-      webhookKey <- ZIOwebhookKey.flatMap(x => x.flatMap(y => ZIO.fromOption(y)))
-      uri = UriInterpolator.interpolate(StringContext(s"https://discord.com/api/webhooks/${webhookKey}"))
+      webhookKey <- ZIOwebhookKey.flatMap(x =>
+        x.flatMap(y => ZIO.fromOption(y))
+      )
+      uri = UriInterpolator.interpolate(
+        StringContext(s"https://discord.com/api/webhooks/${webhookKey}")
+      )
       _ <- Console.printLine(s"${uri}")
-      _ <- ZIO.attempt(basicRequest
-      .body(requestPayLoad)
-      .header("Content-Type", "application/json", replaceExisting = true)
-      .post(uri)
-      .send(backend))
+      _ <- ZIO.attempt(
+        basicRequest
+          .body(requestPayLoad)
+          .header("Content-Type", "application/json", replaceExisting = true)
+          .post(uri)
+          .send(backend)
+      )
     } yield ()
-
 
   }
 }

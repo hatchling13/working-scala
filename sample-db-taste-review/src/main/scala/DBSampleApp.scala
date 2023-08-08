@@ -3,9 +3,21 @@ import io.github.gaelrenoux.tranzactio.ConnectionSource
 import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio.{ZIO, ZIOAppDefault, ZLayer, _}
 
-case class UserReviewInput(userName: String, location: String, rate: Int, content: String, password: String)
+case class UserReviewInput(
+    userName: String,
+    location: String,
+    rate: Int,
+    content: String,
+    password: String
+)
 
-case class ReviewRow(id: Int, userName: String, location: String, rate: Int, content: String)
+case class ReviewRow(
+    id: Int,
+    userName: String,
+    location: String,
+    rate: Int,
+    content: String
+)
 
 case class ReviewRowWithPassword(id: Int, password: String)
 
@@ -21,9 +33,7 @@ object DBSampleApp extends ZIOAppDefault {
                   |SET content = ${content},
                   |rate = ${rate}
                   |where id = ${id}
-                 """.stripMargin
-              .update
-              .run
+                 """.stripMargin.update.run
           }
         } yield res)
 
@@ -41,7 +51,6 @@ object DBSampleApp extends ZIOAppDefault {
                 |FROM review
                 |WHERE user_name = ${username};
              """.stripMargin
-
             .query[ReviewRow]
             .to[List]
 
@@ -73,8 +82,7 @@ object DBSampleApp extends ZIOAppDefault {
       _ <- Console.printLine("4: 리뷰 수정")
 
       userSelect <- Console.readLine("기능을 선택해주세요. : ")
-    }
-    yield (userSelect)
+    } yield (userSelect)
   }
 
   def createReviewInput = {
@@ -88,15 +96,22 @@ object DBSampleApp extends ZIOAppDefault {
         ZIO.fail(new Exception("별점은 1점에서 5점까지 입력 가능합니다. 프로그램을 다시 시작해주세요!"))
       }
       content <- Console.readLine("특별이 맛있었거나 좋았던 점을 알려주세요! : ").map(_.trim)
-      pw <- Console.readLine("해당 글을 수정/삭제하기 위해서는 추후에 비밀번호가 필요합니다. 비밀번호를 입력해주세요. : ").map(_.trim)
+      pw <- Console
+        .readLine("해당 글을 수정/삭제하기 위해서는 추후에 비밀번호가 필요합니다. 비밀번호를 입력해주세요. : ")
+        .map(_.trim)
 
       result = UserReviewInput(username, loc, rate, content, pw)
       _ <- Console.printLine("입력이 완료되었습니다!")
-    }
-    yield (result)
+    } yield (result)
   }
 
-  def insertReview(userName: String, password: String, location: String, content: String, rate: Int) = for {
+  def insertReview(
+      userName: String,
+      password: String,
+      location: String,
+      content: String,
+      rate: Int
+  ) = for {
     _ <- ZIO.unit
     database <- ZIO.service[Database]
     rows <- database
@@ -114,9 +129,7 @@ object DBSampleApp extends ZIOAppDefault {
                 |  ${content},
                 |  ${location},
                 |  ${rate})
-             """.stripMargin
-            .update
-            .run
+             """.stripMargin.update.run
         }
       } yield res)
 
@@ -133,9 +146,7 @@ object DBSampleApp extends ZIOAppDefault {
             sql"""|DELETE
                   |FROM review
                   |WHERE id = ${id}
-                 """.stripMargin
-              .update
-              .run
+                 """.stripMargin.update.run
           }
         } yield res)
 
@@ -151,7 +162,13 @@ object DBSampleApp extends ZIOAppDefault {
         for {
           _ <- Console.printLine("리뷰 입력을 시작합니다.")
           userInput <- createReviewInput
-          _ <- insertReview(userInput.userName, userInput.password, userInput.password, userInput.content, userInput.rate).provide(
+          _ <- insertReview(
+            userInput.userName,
+            userInput.password,
+            userInput.password,
+            userInput.content,
+            userInput.rate
+          ).provide(
             conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
           )
         } yield ()
@@ -165,8 +182,8 @@ object DBSampleApp extends ZIOAppDefault {
             conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
           )
 
-          _ <- ZIO.foreachDiscard(reviewList) {
-            review => {
+          _ <- ZIO.foreachDiscard(reviewList) { review =>
+            {
               for {
                 _ <- Console.printLine("==================================")
                 _ <- Console.printLine(s"id : ${review.id}")
@@ -212,16 +229,23 @@ object DBSampleApp extends ZIOAppDefault {
           _ <- review match {
             case Some(n) =>
               Console.printLine("해당 리뷰가 있음을 확인했습니다.") *>
-                Console.readLine("수정할 리뷰의 본문을 입력해주세요 : ").flatMap(content =>
-                  Console.readLine("수정할 리뷰의 평점을 을 입력해주세요 : ").map(_.toInt).flatMap(rate => {
-                    if (rate > 5 || rate < 1) {
-                      throw new Exception("별점은 1점에서 5점까지 입력 가능합니다. 프로그램을 다시 시작해주세요!")
-                    }
-                    updateReviewById(reviewId, content, rate).provide(
-                      conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
-                    ) *> Console.printLine(s"리뷰(id : ${n.id})를 수정했습니다.")
-                  })
-                )
+                Console
+                  .readLine("수정할 리뷰의 본문을 입력해주세요 : ")
+                  .flatMap(content =>
+                    Console
+                      .readLine("수정할 리뷰의 평점을 을 입력해주세요 : ")
+                      .map(_.toInt)
+                      .flatMap(rate => {
+                        if (rate > 5 || rate < 1) {
+                          throw new Exception(
+                            "별점은 1점에서 5점까지 입력 가능합니다. 프로그램을 다시 시작해주세요!"
+                          )
+                        }
+                        updateReviewById(reviewId, content, rate).provide(
+                          conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
+                        ) *> Console.printLine(s"리뷰(id : ${n.id})를 수정했습니다.")
+                      })
+                  )
             case None =>
               Console.printLine("해당 리뷰를 찾을 수 없습니다. id 또는 비밀번호를 확인해주세요")
           }

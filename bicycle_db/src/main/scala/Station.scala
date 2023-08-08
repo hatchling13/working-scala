@@ -9,30 +9,39 @@ import bicycle_db.StationTableRow
 case class Station(stationId: Int, var availableBikes: Int)
 
 class StationServices(db: Database) {
-    def insertStationTableRow(row: StationTableRow): ZIO[Database, Throwable, Int] = {
-        val insertStationTableQuery = tzio {
-            (fr"insert into station (stationId, availableBikes) values (" ++ fr"${row.stationId}," ++ fr"${row.availableBicycles})").update.run
-        }
-
-        db.transactionOrWiden(insertStationTableQuery).mapError(e => new Exception(e.getMessage))
+  def insertStationTableRow(
+      row: StationTableRow
+  ): ZIO[Database, Throwable, Int] = {
+    val insertStationTableQuery = tzio {
+      (fr"insert into station (stationId, availableBikes) values (" ++ fr"${row.stationId}," ++ fr"${row.availableBicycles})").update.run
     }
 
-    def fetchAndPrintStationData(db: Database): ZIO[Any, Throwable, Unit] = for {
-        stationInfo <- db.transactionOrWiden(for {
-            res <- tzio {
-                (fr"select stationId, availableBikes from station limit 10").query[StationTableRow].to[List]
-            }
-        } yield res)
+    db.transactionOrWiden(insertStationTableQuery)
+      .mapError(e => new Exception(e.getMessage))
+  }
 
-        _ <- zio.Console.printLine(stationInfo)
-    } yield ()
+  def fetchAndPrintStationData(db: Database): ZIO[Any, Throwable, Unit] = for {
+    stationInfo <- db.transactionOrWiden(for {
+      res <- tzio {
+        (fr"select stationId, availableBikes from station limit 10")
+          .query[StationTableRow]
+          .to[List]
+      }
+    } yield res)
 
-    def deleteAllStations: ZIO[Database, Throwable, Int] = {
-        val deleteAllStationsQuery = tzio {
-            (fr"delete from station").update.run
-        }
+    _ <- zio.Console.printLine(stationInfo)
+  } yield ()
 
-        val db = ZIO.service[Database]
-        db.flatMap(database => database.transactionOrWiden(deleteAllStationsQuery).mapError(e => new Exception(e.getMessage)))
+  def deleteAllStations: ZIO[Database, Throwable, Int] = {
+    val deleteAllStationsQuery = tzio {
+      (fr"delete from station").update.run
     }
+
+    val db = ZIO.service[Database]
+    db.flatMap(database =>
+      database
+        .transactionOrWiden(deleteAllStationsQuery)
+        .mapError(e => new Exception(e.getMessage))
+    )
+  }
 }
