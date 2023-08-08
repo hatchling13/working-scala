@@ -36,7 +36,30 @@ object ServerExample extends ZIOAppDefault {
 //              |{ "count" : -12}
 //              |""".stripMargin))
         } yield (res)
+
+      case Method.GET -> Root / "reporting-test" =>
+        for {
+          age <- Random.nextIntBounded(13)
+          hobbies = List("공차기", "요리하기", "스쿠터", "코딩")
+          shuffledHobbies <- Random.shuffle(hobbies)
+          firstHobbies = shuffledHobbies.take(2)
+          friend: Friend = Friend("익명", age, firstHobbies, "익명")
+
+          res <- ZIO.succeed(Response.text(friend.toJson))
+        } yield (res)
     }
+
+  case class Friend(
+      name: String,
+      age: Int,
+      hobbies: List[String],
+      location: String
+  )
+
+  object Friend {
+    implicit val decoder: JsonDecoder[Friend] = DeriveJsonDecoder.gen[Friend]
+    implicit val encoder: JsonEncoder[Friend] = DeriveJsonEncoder.gen[Friend]
+  }
 
   override val run =
     Server

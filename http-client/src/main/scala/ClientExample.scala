@@ -1,44 +1,49 @@
+import sttp.client3.ziojson.asJson
 import zio._
 import sttp.client3._
+import zio.json.{
+  DeriveJsonDecoder,
+  DeriveJsonEncoder,
+  EncoderOps,
+  JsonDecoder,
+  JsonEncoder
+}
 
-object ClientExample extends App {
+case class Friend(
+    name: String,
+    age: Int,
+    hobbies: List[String],
+    location: String
+)
 
-  //https://sttp.softwaremill.com/en/stable/quickstart.html
-  val backend = HttpClientSyncBackend()
-  val response = basicRequest
-    .body("Hello, world!")
-    .post(uri"http://localhost:13333/client-test")
-    .send(backend)
+object Friend {
+  implicit val decoder: JsonDecoder[Friend] = DeriveJsonDecoder.gen[Friend]
+  implicit val encoder: JsonEncoder[Friend] = DeriveJsonEncoder.gen[Friend]
+}
 
-  println(response.body)
+object Reporting extends ZIOAppDefault {
+  val prog = for {
+    _ <- ZIO.unit
+    backend: SttpBackend[Identity, Any] = HttpClientSyncBackend()
 
-  //https://sttp.softwaremill.com/en/stable/json.html
-//  import sttp.client3._
-//  import sttp.client3.ziojson._
-//  import zio.json._
-//
-//  val backend: SttpBackend[Identity, Any] = HttpClientSyncBackend()
-//
-//  implicit val payloadJsonEncoder: JsonEncoder[RequestPayload] =
-//    DeriveJsonEncoder.gen[RequestPayload]
-//  implicit val myResponseJsonDecoder: JsonDecoder[ResponsePayload] =
-//    DeriveJsonDecoder.gen[ResponsePayload]
-//
-//  val requestPayload = RequestPayload("some data")
-//
-//  val response: Identity[
-//    Response[Either[ResponseException[String, String], ResponsePayload]]
-//  ] =
-//    basicRequest
-//      .post(uri"http://localhost:13333/client-test")
-//      .body(requestPayload)
-//      .response(asJson[ResponsePayload])
-//      .send(backend)
-//
-//  case class RequestPayload(msg: String)
-//
-//  case class ResponsePayload(count: Int)
-//
-//  val run = ZIO.attempt(response).debug("res")
+    response = basicRequest
+      .get(uri"http://localhost:13333/reporting-test")
+      .response(asJson[Friend])
+      .send(backend)
+    f <- response.body match {
+      case Left(_) => ZIO.fail(new Exception("fail"))
+      case Right(friend) => {
+        ZIO.succeed(friend)
+      }
+    }
+  } yield f
+  override def run = for {
+    friends <- ZIO.foreach(1 to 100) { _ =>
+      prog.debug("zz")
+    }
+    _ = println(friends.toJson)
+    ageSum = friends.map(_.age).sum
+    _ <- zio.Console.printLine(ageSum)
+  } yield ()
 
 }
