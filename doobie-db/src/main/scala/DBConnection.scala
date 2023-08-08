@@ -2,7 +2,7 @@ import io.github.gaelrenoux.tranzactio.ConnectionSource
 import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio._
 
-object PostgresConnection {
+object DBConnection {
   val postgres = locally {
     val path = "localhost:5433"
     val name = "postgres"
