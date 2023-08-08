@@ -26,7 +26,7 @@
         .transactionOrWiden(for {
           res <- tzio {
             sql"""|select name, hobby
-                  |from test_table""".stripMargin
+                  |from zombie""".stripMargin
               .query[TestTableRow]
               .to[List]
           }
@@ -40,9 +40,10 @@
     )
 
     val sqlite = locally {
-      val path = "C:/Users/jihun/coding/ZIOPROJ/ZIODB/ZIO_TEST_DB.db"
+      val path = SimpleUtil.path
       s"jdbc:sqlite:$path"
     }
+
     val postgres = locally {
       val path = "localhost:5432"
       val name = "postgres"

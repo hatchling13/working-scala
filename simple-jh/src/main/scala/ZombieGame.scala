@@ -7,6 +7,8 @@ import doobie.implicits._
 case class Zombie(name: String)
 
 object ZombieGame extends ZIOAppDefault {
+  //val config = ScalafmtConfig.fromHoconFile("./scalafmt.conf")
+
   def getTargetName(rows: List[Zombie], choice: Integer) = for {
     result <- ZIO.attempt(rows(choice).name)
         .catchAll(cause => ZIO.succeed("")
@@ -53,7 +55,7 @@ object ZombieGame extends ZIOAppDefault {
   )
 
   val sqlite = locally {
-    val path = "C:/Users/jihun/coding/ZIOPROJ/ZIODB/ZIO_TEST_DB.db"
+    val path = SimpleUtil.path
     s"jdbc:sqlite:$path"
   }
 
