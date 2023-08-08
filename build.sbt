@@ -43,7 +43,7 @@ lazy val `http-server` = project
   .settings(
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio-http" % "3.0.0-RC2",
-      "dev.zio" %% "zio-json" % "0.5.0",
+      "dev.zio" %% "zio-json" % "0.5.0"
     )
   )
 
@@ -109,7 +109,7 @@ lazy val Forecast = project
       "dev.zio" %% "zio-json" % "0.3.0-RC10",
       "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M2",
       "com.softwaremill.sttp.client4" %% "zio-json" % "4.0.0-M2",
-      "com.nrinaudo" %% "kantan.csv" % "0.7.0",
+      "com.nrinaudo" %% "kantan.csv" % "0.7.0"
     )
   )
 
@@ -137,7 +137,6 @@ lazy val `forecast-subway` = project
     )
   )
 
-
 lazy val `sample-db` = project
   .settings(sharedSettings)
   .settings(
@@ -145,10 +144,9 @@ lazy val `sample-db` = project
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
       "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
       "org.xerial" % "sqlite-jdbc" % "3.40.1.0",
-      "org.postgresql" % "postgresql" % "42.5.4",
+      "org.postgresql" % "postgresql" % "42.5.4"
     )
   )
-
 
 lazy val `bicycle_db` = project
   .settings(sharedSettings)
@@ -176,6 +174,7 @@ lazy val `tabling` = project
   .settings(sharedSettings)
   .settings(
     libraryDependencies ++= Seq(
+      "dev.zio" %% "zio-http" % "3.0.0-RC2",
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
       "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
       "org.xerial" % "sqlite-jdbc" % "3.40.1.0",
@@ -183,14 +182,14 @@ lazy val `tabling` = project
     )
   )
 
-  lazy val `doobie-db` = project
+lazy val `doobie-db` = project
   .settings(sharedSettings)
   .settings(
     libraryDependencies ++= Seq(
+      "dev.zio" %% "zio-http" % "3.0.0-RC2",
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
       "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
-      "org.postgresql" % "postgresql" % "42.6.0",
-      "dev.zio" %% "zio-http" % "3.0.0-RC2"
+      "org.xerial" % "sqlite-jdbc" % "3.40.1.0",
+      "org.postgresql" % "postgresql" % "42.5.4",
     )
   )
-
