@@ -3,7 +3,19 @@ import io.github.gaelrenoux.tranzactio.ConnectionSource
 import io.github.gaelrenoux.tranzactio.doobie.Database
 
 object Damaged extends ZIOAppDefault {
-  private val conn = PostgreSQLConnection.connection
+  def getUser(id: Int) = for {
+    users <- PostgreSQLService
+      .selectFromTable[User]("user_table", List("id", "name", "hp"))
+
+    result = users match {
+      case Left(errorMessage) => Left(errorMessage)
+      case Right(users) =>
+        users.find(user => user.id == id) match {
+          case None       => Left("No such user!")
+          case Some(user) => Right(user)
+        }
+    }
+  } yield result
 
   def subtractHp(user: Either[String, User], value: Int) = for {
     _ <- ZIO.unit
@@ -28,17 +40,17 @@ object Damaged extends ZIOAppDefault {
   } yield result
 
   def attackUser(id: Int, damage: Int) = for {
-    retrieveduser <- PostgreSQLConnection.getUser(id)
+    retrieveduser <- getUser(id)
 
     subtractResult <- subtractHp(retrieveduser, 10)
 
-    updateResult <- PostgreSQLConnection.updateUser(subtractResult)
+    updateResult <- PostgreSQLService.updateUser(subtractResult)
   } yield updateResult
 
   private val program = for {
-    doesTableExists <- PostgreSQLConnection.userTableExists()
+    doesTableExists <- PostgreSQLService.userTableExists("user_table")
 
-    createTableResult <- PostgreSQLConnection.createUserTable(doesTableExists)
+    createTableResult <- PostgreSQLService.createUserTable(doesTableExists)
 
     _ <- createTableResult match {
       case Left(message) =>
@@ -68,6 +80,6 @@ object Damaged extends ZIOAppDefault {
 
   } yield ()
   override def run = program.provide(
-    conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
+    PostgreSQLService.DBLayer
   )
 }

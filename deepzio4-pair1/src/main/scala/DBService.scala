@@ -4,15 +4,23 @@ import java.sql.{Connection, DriverManager, SQLException}
 import doobie._
 import doobie.implicits._
 import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
+import io.github.gaelrenoux.tranzactio.ConnectionSource
 
-case class User(id: Int, name: String, hp: Int)
 case class Table(tableName: String)
 
-trait DBConnection {
+case class User(id: Int, name: String, hp: Int)
+
+case class CouponUser(name: String, level: Int)
+case class Coupon(owner: String, discount: Int)
+
+trait DBService {
   def connection: ZLayer[Any, SQLException, Connection]
+
+  lazy val DBLayer =
+    connection >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
 }
 
-object PostgreSQLConnection extends DBConnection {
+object PostgreSQLService extends DBService {
   private val postgres = locally {
     val path = "localhost:5432"
     val name = "postgres"
@@ -21,14 +29,54 @@ object PostgreSQLConnection extends DBConnection {
     s"jdbc:postgresql://$path/$name?user=$user&password=$password"
   }
 
-  private val tableName = "user_table"
+  private val userTableName = "user_table"
 
   def connection = for {
     layer <- ZLayer(ZIO.attempt(DriverManager.getConnection(postgres)))
       .mapError(error => new SQLException(error))
   } yield layer
 
-  def userTableExists() = for {
+  def selectFromTable[A: Read](tableName: String, columns: List[String]) = for {
+    db <- ZIO.service[Database]
+
+    selectColumns <-
+      if (columns.isEmpty) {
+        ZIO.left("Please specify columns")
+      } else {
+        ZIO.right(Fragment.const(columns.mkString(", ")))
+      }
+    name = Fragment.const(tableName)
+
+    result <- selectColumns match {
+      case Left(error) => ZIO.left(error)
+      case Right(columns) =>
+        for {
+          query <- db.transactionOrWiden(tzio {
+            sql"select $columns from $name".query[A].to[List]
+          })
+          res <- query.isEmpty match {
+            case true  => ZIO.left("Empty table")
+            case false => ZIO.right(query)
+          }
+        } yield res
+    }
+
+  } yield result
+
+  def insertCouponTable(coupons: List[Coupon]) = for {
+    db <- ZIO.service[Database]
+
+    sql = "insert into coupon_table (owner, discount) values (?, ?)"
+
+    update = Update[Coupon](sql).updateMany(coupons)
+
+    result <- db.transactionOrWiden(tzio { update })
+
+  } yield result
+
+  // ---
+
+  def userTableExists(name: String) = for {
     db <- ZIO.service[Database]
 
     query = tzio {
@@ -41,7 +89,7 @@ object PostgreSQLConnection extends DBConnection {
       results <- db.transactionOrWiden(query)
       names = results.map(_.tableName)
 
-      doesExists = names.exists(_ == tableName) match {
+      doesExists = names.exists(_ == userTableName) match {
         case false => Left("No table!")
         case true  => Right(())
       }
@@ -55,7 +103,7 @@ object PostgreSQLConnection extends DBConnection {
       case Left(_) =>
         for {
           _ <- ZIO.unit
-          queryString = sql"""|create table ${Fragment.const(tableName)} (
+          queryString = sql"""|create table ${Fragment.const(userTableName)} (
                               |id serial primary key,
                               |name text not null,
                               |hp integer not null
@@ -73,22 +121,6 @@ object PostgreSQLConnection extends DBConnection {
     }
   } yield result
 
-  def getUser(id: Int) = for {
-    db <- ZIO.service[Database]
-
-    queryString = sql"""|select * from ${Fragment.const(tableName)}
-                  |where id = ${Fragment.const(id.toString())}""".stripMargin
-
-    action = tzio { queryString.query[User].to[List] }
-
-    result <- db.transactionOrWiden(action)
-
-    user = result.isEmpty match {
-      case true  => Left("No such user")
-      case false => Right(result.head)
-    }
-  } yield user
-
   def updateUser(nextUser: Either[String, User]) = for {
     db <- ZIO.service[Database]
 
@@ -101,7 +133,7 @@ object PostgreSQLConnection extends DBConnection {
         for {
           _ <- ZIO.unit
           queryString = {
-            sql"""|update ${Fragment.const(tableName)}
+            sql"""|update ${Fragment.const(userTableName)}
                   |set
                   |hp = ${user.hp}
                   |where id = ${user.id}
