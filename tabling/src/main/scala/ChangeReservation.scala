@@ -2,7 +2,7 @@ import doobie.implicits._
 import io.github.gaelrenoux.tranzactio.{ConnectionSource, DbException, doobie}
 import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio._
-
+import DBConnection.postgres
 import java.io.IOException
 
 object ChangeReservation extends ZIOAppDefault {
@@ -68,12 +68,12 @@ object ChangeReservation extends ZIOAppDefault {
     .provide(
     conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
   )
-
-  private val conn = ZLayer(
+  val conn = ZLayer(
     ZIO.attempt(
       java.sql.DriverManager.getConnection(
-        s"jdbc:postgresql://DB_PATH/DB_NAME?user=DB_USER&password=DB_PASSWORD"
+        postgres
       )
     )
   )
+
 }
