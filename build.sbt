@@ -81,7 +81,7 @@ lazy val `cheese` = project
       "dev.zio" %% "zio-json" % "0.5.0",
       "com.lihaoyi" %% "os-lib" % "0.9.1",
       "com.lihaoyi" %% "ujson" % "3.0.0",
-      "dev.zio" %% "zio-http" % "3.0.0-RC2",
+      "dev.zio" %% "zio-http" % "3.0.0-RC2"
     )
   )
 
@@ -94,7 +94,7 @@ lazy val `deepZIOExam` = project
       "dev.zio" %% "zio-json" % "0.5.0",
       "com.lihaoyi" %% "os-lib" % "0.9.1",
       "com.lihaoyi" %% "ujson" % "3.0.0",
-      "dev.zio" %% "zio-http" % "3.0.0-RC2",
+      "dev.zio" %% "zio-http" % "3.0.0-RC2"
     )
   )
 
@@ -131,7 +131,6 @@ lazy val `forecast-cheese` = project
     )
   )
 
-
 lazy val `simple-jh` = project
   .settings(sharedSettings)
   .settings(
@@ -141,7 +140,6 @@ lazy val `simple-jh` = project
       "org.xerial" % "sqlite-jdbc" % "3.40.1.0"
     )
   )
-
 
 //lazy val `forecast` = project.dependsOn(`read-file`)
 //  .settings(sharedSettings)
@@ -155,7 +153,6 @@ lazy val `simple-jh` = project
 //      "org.scalameta" %% "scalafmt-core" % "2.7.5"
 //    )
 //  )
-
 
 lazy val `forecast-subway` = project
   .settings(sharedSettings)
@@ -209,7 +206,7 @@ lazy val `tabling` = project
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
       "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
       "org.xerial" % "sqlite-jdbc" % "3.40.1.0",
-      "org.postgresql" % "postgresql" % "42.5.4",
+      "org.postgresql" % "postgresql" % "42.5.4"
     )
   )
 
@@ -221,6 +218,16 @@ lazy val `doobie-db` = project
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
       "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
       "org.xerial" % "sqlite-jdbc" % "3.40.1.0",
-      "org.postgresql" % "postgresql" % "42.5.4",
+      "org.postgresql" % "postgresql" % "42.5.4"
+    )
+  )
+
+lazy val `deepzio4-pair1` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.postgresql" % "postgresql" % "42.6.0",
+      "org.tpolecat" %% "doobie-core" % "1.0.0-RC4",
+      "io.github.gaelrenoux" %% "tranzactio-doobie" % "5.0.1"
     )
   )
