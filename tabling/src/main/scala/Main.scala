@@ -3,6 +3,7 @@ import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio._
 import _root_.doobie._
 import _root_.doobie.implicits._
+import DBConnection.postgres
 
 import java.io.IOException
 
@@ -124,12 +125,12 @@ object Tabling extends ZIOAppDefault {
   override def run = prog
     .provide(
       conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
-    ).exitCode
+    )
 
-  private val conn = ZLayer(
+  val conn = ZLayer(
     ZIO.attempt(
       java.sql.DriverManager.getConnection(
-        s"jdbc:postgresql://DB_PATH/DB_NAME?user=DB_USER&password=DB_PASSWORD"
+        postgres
       )
     )
   )
