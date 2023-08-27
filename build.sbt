@@ -19,7 +19,7 @@ lazy val root = (project in file("."))
     name := "working-scala"
   )
 
-lazy val `zio-json` = project
+lazy val `json-handling` = project
   .settings(sharedSettings)
   .settings(
     libraryDependencies ++= Seq(
