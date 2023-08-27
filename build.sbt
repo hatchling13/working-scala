@@ -198,3 +198,11 @@ lazy val `doobie-db` = project
       "org.postgresql" % "postgresql" % "42.5.4",
     )
   )
+
+lazy val `multi-project` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+
+    )
+  )
