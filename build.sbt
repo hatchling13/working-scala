@@ -203,6 +203,8 @@ lazy val `multi-project` = project
   .settings(sharedSettings)
   .settings(
     libraryDependencies ++= Seq(
-
     )
   )
+
+lazy val `testing` = project
+  .settings(sharedSettings)
