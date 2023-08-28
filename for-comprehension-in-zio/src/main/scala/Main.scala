@@ -3,10 +3,10 @@ import zio._
 object Main extends ZIOAppDefault {
   val getTheAnswer = ZIO.succeed(42)
 
-  private val effect1 = getTheAnswer
+  val effect1 = getTheAnswer
     .flatMap(answer => Console.printLine(s"삶, 우주 그리고 모든 것에 대한 답은 $answer!"))
 
-  private val effect2 = for {
+  val effect2 = for {
     answer <- getTheAnswer
     _ <- Console.printLine(s"삶, 우주 그리고 모든 것에 대한 답은 $answer!")
   } yield ()
