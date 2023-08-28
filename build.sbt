@@ -231,3 +231,7 @@ lazy val `deepzio4-pair1` = project
       "io.github.gaelrenoux" %% "tranzactio-doobie" % "5.0.1"
     )
   )
+
+lazy val `for-comprehension-in-zio` = project
+  .settings(sharedSettings)
+  .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
