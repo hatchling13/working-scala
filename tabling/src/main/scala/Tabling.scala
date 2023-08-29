@@ -1,8 +1,8 @@
-import io.github.gaelrenoux.tranzactio.ConnectionSource
+import io.github.gaelrenoux.tranzactio.{ConnectionSource, DbException, doobie}
 import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio._
-import doobie._
-import doobie.implicits._
+import _root_.doobie._
+import _root_.doobie.implicits._
 
 import java.io.IOException
 
@@ -10,10 +10,8 @@ object Tabling extends ZIOAppDefault {
 
   def readLine(message: String): IO[IOException, String] = zio.Console.readLine(message)
 
-  val prog = for {
-    _ <- ZIO.unit
+  def readRestaurant(): ZIO[doobie.Database.Service, Exception, String] = for {
     database <- ZIO.service[Database.Service]
-
     // 예약 가능한 전체 식당 조회해서 출력
     rows <- database
       .transactionOrWiden(for {
@@ -26,46 +24,8 @@ object Tabling extends ZIOAppDefault {
       } yield res)
 
     _ <- zio.Console.printLine(rows)
-
-    restaurant_id <- readLine("식당을 선택해주세요 : ")
-    isExist <- database
-      .transactionOrWiden(for {
-        res <- tzio {
-          sql"""|select EXISTS(select * from restaurant where id = ${Integer.parseInt(restaurant_id)})""".stripMargin
-            .query[Boolean]
-            .unique
-        }
-      } yield res)
-
-    // 식당 잘못 선택 시 종료
-    _ <- ZIO.when(!isExist)({
-      zio.Console.printLine("잘못 선택하셨습니다. 프로그램을 종료합니다.")
-      sys.exit(-1)
-    })
-
-    // 예약 정보 입력
-    reservation <- readReservation(restaurant_id)
-
-    insertResult <- database
-      .transactionOrWiden(for {
-        res <- tzio {
-          sql"""|insert into reservation values
-                |(${reservation.name},
-                |${reservation.phone},
-                |${reservation.restaurant_id},
-                |${reservation.reservation_date},
-                |${reservation.reservation_time},
-                |${reservation.guests})""".stripMargin
-            .update()
-            .run
-        }
-      } yield res)
-
-    _ <- insertResult match {
-      case 1 => zio.Console.printLine(s"예약이 완료되었습니다. $reservation")
-      case _ => zio.Console.printLine(s"예약하다 뭔가 문제가 있어요.")
-    }
-  } yield ()
+    input <- readLine("식당을 선택해주세요 : ")
+  } yield input
 
   def readReservation(restaurant_id: String): ZIO[Any, IOException, Reservation] = for {
     name <- readLine("예약자 이름을 입력해주세요 : ")
@@ -76,6 +36,90 @@ object Tabling extends ZIOAppDefault {
 
     reservation = Reservation(name, phone, Integer.parseInt(restaurant_id), reservation_date, reservation_time, Integer.parseInt(guests))
   } yield reservation
+  
+  def isCouponReservation(guests: Int): Boolean = guests > 5
+
+  def saveCoupon(coupon: Coupon): ZIO[doobie.Database.Service, DbException, Int] = for {
+    db <- ZIO.service[Database.Service]
+    insertResult <- db
+      .transactionOrWiden(for {
+        res <- tzio {
+          sql"""|insert into coupon values
+                |(${coupon.owner},
+                |${coupon.discount_rate})""".stripMargin
+            .update()
+            .run
+        }
+      } yield res)
+  } yield insertResult
+
+  def couponByGuests(reservation: Reservation): Option[Coupon] =
+    reservation.guests match {
+        case guests if guests > 0 && guests < 10 => Some(Coupon(reservation.name, guests * 10))
+        case guests if guests >= 10 => Some(Coupon(reservation.name, 100))
+        case _ => None
+    }
+
+  def saveCouponIfExists(coupon: Option[Coupon]) = coupon match {
+    case Some(coupon) => saveCoupon(coupon)
+    case _ => ZIO.unit
+  }
+
+  def saveReservation(reservation: Reservation): ZIO[doobie.Database.Service, DbException, Int] = for {
+    db <- ZIO.service[Database.Service]
+    insertResult <- db
+      .transactionOrWiden(for {
+      res <- tzio {
+        sql"""|insert into reservation values
+                    |(${reservation.name},
+                    |${reservation.phone},
+                    |${reservation.restaurant_id},
+                    |${reservation.reservation_date},
+                    |${reservation.reservation_time},
+                    |${reservation.guests})""".stripMargin
+        .update()
+        .run
+      }
+    } yield res)
+  } yield insertResult
+
+  def isRestaurantExist(restaurant_id: String): ZIO[doobie.Database.Service, DbException, Boolean] = for {
+    database <- ZIO.service[Database.Service]
+    result <- database
+      .transactionOrWiden(for {
+        res <- tzio {
+        sql"""|select EXISTS(select * from restaurant where id = ${Integer.parseInt(restaurant_id)})""".stripMargin
+      .query[Boolean]
+      .unique
+      }
+    } yield res)
+  } yield result
+
+  val prog = for {
+    _ <- ZIO.unit
+    // 1. 식당 선택
+    restaurant_id <- readRestaurant()
+    isExist <- isRestaurantExist(restaurant_id)
+    // 식당이 존재하지 않으면 종료
+    _ <- ZIO.when(!isExist)({
+      zio.Console.printLine("잘못 선택하셨습니다. 프로그램을 종료합니다.")
+      sys.exit(-1)
+    })
+
+    // 2. 예약 정보 입력
+    reservation <- readReservation(restaurant_id)
+
+    // 3. 쿠폰 발급
+    coupon = couponByGuests(reservation)
+    _ <- saveCouponIfExists(coupon)
+    
+    // 4. 예약 정보 저장
+    insertResult <- saveReservation(reservation)
+    _ <- insertResult match {
+      case 1 => zio.Console.printLine(s"예약이 완료되었습니다. $reservation")
+      case _ => zio.Console.printLine(s"예약하다 뭔가 문제가 있어요.")
+    }
+  } yield ()
 
   override def run = prog
     .provide(
