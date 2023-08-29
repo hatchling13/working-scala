@@ -41,6 +41,8 @@ val list = (1 to 5).map(i => i * 2)
 
 ### for <-> flatMap
 ```scala
+def quotient(a: Int, b: Int) = if (b == 0) None else Some(a / b)
+
 val list = List((3, 2), (10, 3), (20, 0), (4, 1))
 
 // 1. for 키워드를 사용한 변환
