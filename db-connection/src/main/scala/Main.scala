@@ -1,18 +1,35 @@
-import io.github.gaelrenoux.tranzactio.ConnectionSource
 import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio._
-import doobie._
-import doobie.implicits._
 
-import DBConnection._
-
-case class TestTableRow(name: String, hobby: String)
 
 object Main extends ZIOAppDefault {
-  val main = for {
-    // 내용
-  } yield ()
-  override def run = main.provide(
-    conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
-  )
+  def run = {
+    for {
+      database <- new DBConnection().run
+
+      dbService = new DBService()
+
+      // INSERT
+      _ <- dbService.insertTableRow(database, TestTableRow("John", "Skiing"))
+      _ <- dbService.insertTableRow(database, TestTableRow("Tom", "Skiing"))
+
+      // SELECT
+      rows <- dbService.selectTableRow(database)
+      _ <- zio.Console.printLine(rows) // 조회 데이터 출력
+
+      // UPDATE
+      _ <- dbService.updateTableRow(database, TestTableRow("John", "sleep"))
+
+      // SELECT
+      rows <- dbService.selectTableRow(database)
+      _ <- zio.Console.printLine(rows) // 조회 데이터 출력
+
+      // DELETE
+      _ <- dbService.deleteTableRow(database, "John")
+
+      // SELECT
+      rows <- dbService.selectTableRow(database)
+      _ <- zio.Console.printLine(rows) // 조회 데이터 출력
+    } yield ()
+  }
 }
