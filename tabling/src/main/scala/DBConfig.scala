@@ -17,7 +17,7 @@ object Postgres extends DBService  {
     Login("postgres", "1q2w3e4r")
   )
 
-  val url = s"jdbc:postgresql://${config.host.path}/${config.host.name}?user=${config.login.user}&password=${config.login.password}"
+  val url = s"jdbc:postgresql://${config.host.path}:${config.host.port}/${config.host.name}?user=${config.login.user}&password=${config.login.password}"
 
   def connection = for {
     layer <- ZLayer(ZIO.attempt(DriverManager.getConnection(url)))

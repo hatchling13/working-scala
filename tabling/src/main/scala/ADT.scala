@@ -12,3 +12,8 @@ case class Reservation(
     reservation_time: String,
     guests: Int
 )
+
+case class ReservationInfo(
+    name: String,
+    phone: String
+)

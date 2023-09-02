@@ -21,35 +21,14 @@ object Service {
 
   def checkIfCustomerGetCoupon(guests: Int): Boolean = guests > 5
 
-  def readReservation(restaurant_id: String): ZIO[Any, Exception, Reservation] =
-    for {
-      name <- readLine("예약자 이름을 입력해주세요 : ")
-      phone <- readLine("예약자 전화번호 뒤 4자리를 입력해주세요 : ")
-      reservation_date <- readLine("예약 날짜를 입력해주세요 (ex:0730) : ")
-      reservation_time <- readLine("예약 시간을 입력해주세요 (ex:1430) : ")
-      guests <- readLine("인원 수를 숫자로 입력해주세요 : ")
 
-      reservation = Reservation(
-        name,
-        phone,
-        Integer.parseInt(restaurant_id),
-        reservation_date,
-        reservation_time,
-        Integer.parseInt(guests)
-      )
-    } yield reservation
+  def makeReservation(info: ReservationInfo) = for {
 
-
-  val makeReservation = for {
-    _ <- ZIO.unit
     database <- ZIO.service[Database.Service]
-
-    name <- readLine("이름을 선택해주세요 : ")
-    phone <- readLine("전화번호 뒤 4자리를 입력해주세요 : ")
     reservationList <- database
       .transactionOrWiden(for {
         res <- tzio {
-          sql"""|select * from reservation where name = $name and phone = $phone""".stripMargin
+          sql"""|select * from reservation where name = ${info.name} and phone = ${info.phone}""".stripMargin
             .query[Reservation]
             .to[List]
         }

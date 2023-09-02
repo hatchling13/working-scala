@@ -4,9 +4,9 @@ import Util._
 object Main extends ZIOAppDefault {
 
   val prog = for {
-    _ <- ZIO.unit
     // 1. 식당 선택
-    restaurant_id <- Repository.readRestaurant()
+    restaurant_list <- Repository.findAllRestaurantList()
+    restaurant_id <- Controller.readRestaurant(restaurant_list)
     isExist <- Repository.isRestaurantExist(restaurant_id)
     // 식당이 존재하지 않으면 종료
     _ <- ZIO.when(!isExist)({
@@ -15,7 +15,7 @@ object Main extends ZIOAppDefault {
     })
 
     // 2. 예약 정보 입력
-    reservation <- Service.readReservation(restaurant_id)
+    reservation <- Controller.readReservation(restaurant_id)
     _ = zio.Console.printLine("인원수에 맞는 쿠폰이 발급됩니다.")
     // 3. 쿠폰 발급
     rate <- ZIO.fromOption(Service.calculateRateByGuestNumber(reservation))

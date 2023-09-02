@@ -23,7 +23,7 @@ object Repository {
         .run
       }
     } yield ())
-    _ = zio.Console.printLine(s"${reservation.name}님! 예약이 완료되었습니다.")
+    // _ = zio.Console.printLine(s"${reservation.name}님! 예약이 완료되었습니다.")
   } yield ()
 
   def saveCoupon(coupon: Coupon): ZIO[doobie.Database.Service, DbException, Unit] = for {
@@ -38,13 +38,13 @@ object Repository {
             .run
         }
       } yield ())
-    _ = zio.Console.printLine(s"${coupon.discount_rate}% 쿠폰이 발급되었습니다.")
+    // _ = zio.Console.printLine(s"${coupon.discount_rate}% 쿠폰이 발급되었습니다.")
   } yield ()
 
-  def readRestaurant(): ZIO[doobie.Database.Service, Exception, String] = for {
+  def findAllRestaurantList(): ZIO[doobie.Database.Service, Exception, List[Restaurant]] = for {
     database <- ZIO.service[Database.Service]
     // 예약 가능한 전체 식당 조회해서 출력
-    rows <- database
+    list <- database
       .transactionOrWiden(for {
         res <- tzio {
           sql"""|select id, name
@@ -54,9 +54,7 @@ object Repository {
         }
       } yield res)
 
-    _ <- zio.Console.printLine(rows)
-    input <- readLine("식당을 번호로 입력해주세요 : ")
-  } yield input
+  } yield list
 
   def isRestaurantExist(restaurant_id: String): ZIO[doobie.Database.Service, DbException, Boolean] = for {
     database <- ZIO.service[Database.Service]
