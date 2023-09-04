@@ -16,7 +16,7 @@
 
 ## 개요
 
-ZIO의 Error Handling 문서 한글화 및 예제 코드 프로젝트입니다.
+[ZIO의 Error Handling 문서](https://zio.dev/overview/handling-errors/) 한글화 및 예제 코드 프로젝트입니다.
 
 ## 메소드 목록
 
