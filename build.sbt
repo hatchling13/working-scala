@@ -231,3 +231,13 @@ lazy val `deepzio4-pair1` = project
       "io.github.gaelrenoux" %% "tranzactio-doobie" % "5.0.1"
     )
   )
+
+lazy val `multi-project` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+    )
+  )
+
+lazy val `testing` = project
+  .settings(sharedSettings)
