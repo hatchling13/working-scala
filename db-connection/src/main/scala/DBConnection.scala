@@ -2,8 +2,17 @@ import io.github.gaelrenoux.tranzactio.ConnectionSource
 import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio._
 
-object DBConnection {
-    val sqlite = locally {
+class DBConnection extends ZIOAppDefault  {
+   override def run = prog.provide(
+    conn >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
+  )
+
+  val prog = for {
+    _ <- ZIO.unit
+    database <- ZIO.service[Database]
+  } yield (database)
+
+  val sqlite = locally {
     val path = "identifier.sqlite"
     s"jdbc:sqlite:$path"
   }
