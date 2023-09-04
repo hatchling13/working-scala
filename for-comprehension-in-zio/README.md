@@ -59,7 +59,7 @@ val result = list.flatMap(tuple => quotient(tuple._1, tuple._2))
 각각의 경우에 대해 두 코드는 동일한 작업을 수행하며, 더 나아가서 Scala에서 두 코드는 서로 동치입니다. 컴파일러가 첫번째 형태의 코드를 두번째 형태로 변환하기 때문입니다. 따라서 작업자의 기호에 따라 어떤 스타일로 작성할 지 선택할 수 있습니다.
 
 ### ZIO 타입에 대해 for 사용하기
-`ZIO` 타입은 `foreach`, `filter`, `map`, `flatMap` 함수를 모두 구현하고 있으며, 자세한 구현체는 [여기](https://github.com/zio/zio/blob/series/2.x/core/shared/src/main/scala/zio/ZIO.scala)서 확인할 수 있습니다. 각 함수들이 모두 구현되어있으므로, ZIO 타입에 대해서도 물론 `for`을 사용할 수 있습니다.
+`ZIO` 타입은 `for`문을 사용하기 위해 필요한 고차 함수가 모두 구현되어 있습니다. `map`과 `flatMap`은 물론, `Iterable`을 상속받은 `Collection`에 대해 사용할 수 있는 `foreach`와 `filter`가 구현되어 있어 일반 Scala에서처럼 `for`문을 사용할 수 있습니다. 자세한 구현체는 [여기](https://github.com/zio/zio/blob/series/2.x/core/shared/src/main/scala/zio/ZIO.scala)서 확인할 수 있습니다. 
 
 ```scala
 import zio._
