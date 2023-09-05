@@ -31,6 +31,7 @@ object DITest2 extends ZIOAppDefault {
     _ <- zio.Console.printLine(list) // List(카카오국밥, 네이버국밥, 엔씨국밥)
   } yield ()
 
+  
   override def run = for {
     _ <- ZIO.unit
     _ <- useCaseUsingZLayer().provideLayer(판교식당저장소.layer)
