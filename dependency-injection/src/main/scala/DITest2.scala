@@ -5,8 +5,6 @@ import java.io.IOException
 object DITest2 extends ZIOAppDefault {
   trait 식당저장소 {
     def 모든식당이름가져오기(): ZIO[Any, Nothing, List[String]]
-
-    def 식당메뉴가져오기(name: String): ZIO[Any, Nothing, List[String]]
   }
 
 
