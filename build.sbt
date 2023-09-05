@@ -198,7 +198,7 @@ lazy val `sample-db-taste-review` = project
     )
   )
 
-lazy val `tabling` = project
+lazy val `declarative-prog` = project
   .settings(sharedSettings)
   .settings(
     libraryDependencies ++= Seq(
@@ -231,5 +231,14 @@ lazy val `deepzio4-pair1` = project
       "org.postgresql" % "postgresql" % "42.6.0",
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC4",
       "io.github.gaelrenoux" %% "tranzactio-doobie" % "5.0.1"
+    )
+  )
+
+  lazy val `mocking` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "dev.zio" %% "zio-json" % "0.3.0-RC10"
+
     )
   )
