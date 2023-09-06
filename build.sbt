@@ -241,11 +241,3 @@ lazy val `multi-project` = project
 
 lazy val `testing` = project
   .settings(sharedSettings)
-
-lazy val `dependency-injection` = project
-  .settings(sharedSettings)
-  .settings(
-    libraryDependencies ++= Seq(
-
-    )
-  )
