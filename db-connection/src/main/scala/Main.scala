@@ -1,5 +1,5 @@
-import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio._
+import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 
 
 object Main extends ZIOAppDefault {
@@ -8,6 +8,9 @@ object Main extends ZIOAppDefault {
       database <- new DBConnection().run
 
       dbService = new DBService()
+
+      // TABLE CREATE
+      _ <- dbService.createTable(database, "Person")
 
       // INSERT
       _ <- dbService.insertTableRow(database, TestTableRow("John", "Skiing"))

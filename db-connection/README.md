@@ -28,9 +28,9 @@ Main 파일을 실행하면 입력, 업데이트, 삭제 순으로 확인 가능
 
 - DBConnection.scala : db 연결하는 기능에 대한 클래스가 있습니다. postgresql과 sqlite에 대한 예시가 있습니다.
   - 현재 세팅은 postgresql기준으로 작성되어 있습니다. 만약 db를 sqlite로 변경하여 사용하고 싶은 경우 DBConnection.scala파일 31번째 줄의 postgres를 지우고, sqlite를 입력해주세요.
-  - 현재 세팅된 DB Table 이름은 Person입니다. (postgresql은 person으로 입력하면 잘 실행됩니다.).
+  - **현재 세팅된 DB Table 이름은 Person입니다. (postgresql은 person으로 입력하면 잘 실행됩니다.).**
 - Main.scala: 메인클래스 입니다. 간단한 CRUD를 실행시키고 DB 연결을 진행합니다.
-- CRUD 기능이 있는 클래스 입니다.
+- DBService.scala : CRUD 기능, 테이블 생성 및 테이블이 있는지 확인하는 메소드가 있는 클래스 입니다.
 
 ## 메소드 목록
 
