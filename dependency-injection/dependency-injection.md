@@ -3,8 +3,9 @@
 ## 개요
 예제를 통해 ZIO 환경에서 의존성 주입에 대해 설명합니다.
 일반적인 의존성 주입 방식부터 ZIO를 활용한 방식까지 다루는 예제입니다.
-- [ZIO 의존성 주입 공식 문서](https://zio.dev/reference/di/)
+ZIO 의존성 주입에 대해 자세히 알고 싶다면[ZIO 의존성 주입 공식 문서](https://zio.dev/reference/di/)를 참고하세요.
 
+<br/>
 
 두 가지 방식으로 의존성 주입을 다루어 보겠습니다.
 1. [의존성 주입(DIExam.scala)](https://github.com/SHSongs/working-scala/blob/main/dependency-injection/src/main/scala/DiTest1.scala)
@@ -16,7 +17,7 @@
 
 
 
-<br/>
+<br/><br/>
 
 ## 의존성
 ```scala
@@ -25,7 +26,7 @@
 
 
 
-<br/>
+<br/><br/>
 
 ## 의존성 주입을 사용하는 이유
 의존성 주입은 필요한 외부 객체를 서비스 내부에서 직접 생성하지 않고, 외부에서 제공받는 방식입니다.  
@@ -79,7 +80,7 @@ _ <- useCase(new 강남식당저장소)
 
 
 
-<br/>
+<br/><br/>
 
 ## ZIO Effect에 의존성 주입하기
 [(DIExam1.scala)](https://github.com/SHSongs/working-scala/blob/main/dependency-injection/src/main/scala/DiTest1.scala)에서는 일반적인 메서드에 의존성을 직접 주입했습니다.  
@@ -91,7 +92,7 @@ _ <- useCase(new 강남식당저장소)
 
 
 
-<br/>
+<br/><br/>
 
 ## 메서드 목록
 `ZLayer.succeed()`  
