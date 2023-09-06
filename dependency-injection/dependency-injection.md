@@ -16,7 +16,8 @@
 
 
 
-#
+<br/>
+
 ## 의존성
 ```scala
 "dev.zio" %% "zio" % zioVersion
@@ -24,7 +25,8 @@
 
 
 
-#
+<br/>
+
 ## 의존성 주입을 사용하는 이유
 의존성 주입은 필요한 외부 객체를 서비스 내부에서 직접 생성하지 않고, 외부에서 제공받는 방식입니다.  
 외부로부터 의존성을 제공받아 서비스 내에서 의존 객체를 직접 생성할 필요가 없도록 합니다.
@@ -77,7 +79,8 @@ _ <- useCase(new 강남식당저장소)
 
 
 
-#
+<br/>
+
 ## ZIO Effect에 의존성 주입하기
 [(DIExam1.scala)](https://github.com/SHSongs/working-scala/blob/main/dependency-injection/src/main/scala/DiTest1.scala)에서는 일반적인 메서드에 의존성을 직접 주입했습니다.  
 하지만 ZIO에서는 몇 가지 제공되는 메서드를 통해 ZIO Effect에 의존성을 제공하고, 주입받은 의존성을 사용할 수 있습니다.
@@ -88,7 +91,8 @@ _ <- useCase(new 강남식당저장소)
 
 
 
-#
+<br/>
+
 ## 메서드 목록
 `ZLayer.succeed()`  
 값이나 서비스를 포함하는 레이어를 생성합니다.
