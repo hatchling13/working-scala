@@ -4,14 +4,14 @@ import zio._
 
 object DBConnection {
   val postgres = locally {
-    val path = "localhost:5433"
+    val path = "localhost:5432"
     val name = "postgres"
     val user = "postgres"
     val password = "1q2w3e4r"
-    s"jdbc:postgresql://$path/$name?user=$user&password=$password"
+    s"jdbc:postgresql://localhost:5432/postgres"
   }
 
-  val driver = "org.postgresql.Driver"
+  val driver = "db-connection"
 
   Class.forName(driver)
 
