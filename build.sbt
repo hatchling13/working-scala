@@ -253,3 +253,14 @@ lazy val `multi-project` = project
 
 lazy val `testing` = project
   .settings(sharedSettings)
+
+
+lazy val `error-handling` = project
+  .settings(sharedSettings)
+  .settings(
+  libraryDependencies ++= Seq(
+    "com.lihaoyi" %% "os-lib" % "0.9.1",
+    "com.lihaoyi" %% "ujson" % "3.0.0",
+    "dev.zio" %% "zio-json" % "0.3.0-RC10"
+  )
+)
