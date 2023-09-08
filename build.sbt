@@ -231,3 +231,36 @@ lazy val `deepzio4-pair1` = project
       "io.github.gaelrenoux" %% "tranzactio-doobie" % "5.0.1"
     )
   )
+
+lazy val `db-connection` = project
+.settings(sharedSettings)
+.settings(
+  libraryDependencies ++= Seq(
+    "dev.zio" %% "zio-http" % "3.0.0-RC2",
+    "org.tpolecat" %% "doobie-core" % "1.0.0-RC2",
+    "io.github.gaelrenoux" %% "tranzactio" % "4.1.0",
+    "org.xerial" % "sqlite-jdbc" % "3.40.1.0",
+    "org.postgresql" % "postgresql" % "42.5.4",
+  )
+)
+
+lazy val `multi-project` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+    )
+  )
+
+lazy val `testing` = project
+  .settings(sharedSettings)
+
+
+lazy val `error-handling` = project
+  .settings(sharedSettings)
+  .settings(
+  libraryDependencies ++= Seq(
+    "com.lihaoyi" %% "os-lib" % "0.9.1",
+    "com.lihaoyi" %% "ujson" % "3.0.0",
+    "dev.zio" %% "zio-json" % "0.3.0-RC10"
+  )
+)
