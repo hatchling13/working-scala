@@ -84,12 +84,12 @@ object Repository {
 
   } yield list
 
-  def checkIfRestaurantExist(restaurant_id: String): ZIO[doobie.Database.Service, DbException, Boolean] = for {
+  def checkIfRestaurantExist(restaurantId: String): ZIO[doobie.Database.Service, DbException, Boolean] = for {
     database <- ZIO.service[Database.Service]
     result <- database
       .transactionOrWiden(for {
         res <- tzio {
-        sql"""|select EXISTS(select * from restaurant where id = ${Integer.parseInt(restaurant_id)})""".stripMargin
+        sql"""|select EXISTS(select * from restaurant where id = ${Integer.parseInt(restaurantId)})""".stripMargin
       .query[Boolean]
       .unique
       }
