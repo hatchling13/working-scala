@@ -36,9 +36,3 @@ val effectWithHOF = getTheAnswer
     Console.printLine(s"삶, 우주 그리고 모든 것에 대한 답은 $answerText!")
   )
 ```
-
-// 2. flatMap을 사용한 ZIO Effect
-val effect2: ZIO[Any, IOException, Unit] = getTheAnswer.flatMap(
-  answer => Console.printLine(s"삶, 우주 그리고 모든 것에 대한 답은 $answer!")
-)
-```
