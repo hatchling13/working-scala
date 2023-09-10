@@ -154,4 +154,3 @@ override def run = for {
 } yield ()
 ```
 
-ZIO.service에 대해 자세히 알고 싶다면 [링크](https://zio.dev/reference/contextual/#accessing-zio-environment)(Accessing ZIO Environment)를 참고하세요.
