@@ -15,7 +15,7 @@ ZIO는 함수형 프로그래밍에 그 기반이 있는 라이브러리이며, 
 자세한 구현체는 [여기](https://github.com/zio/zio/blob/series/2.x/core/shared/src/main/scala/zio/ZIO.scala)서 확인할 수 있습니다.
 
 ### ZIO 타입에 for문 적용하기
-[Scala의 for-comprehension 문서]()에서 확인할 수 있듯, Scala 컴파일러는 `for`문을 사용한 코드를 만나면 이를 적절한 형태의 고차 함수로 변환합니다. `ZIO` 타입은 [`flatMap`](https://github.com/zio/zio/blob/b38e4d30c364aa4da0b19bff6acc496e39fc81a8/core/shared/src/main/scala/zio/ZIO.scala#L628)이 정의되어있고, 추가적으로 [`map`](https://github.com/zio/zio/blob/b38e4d30c364aa4da0b19bff6acc496e39fc81a8/core/shared/src/main/scala/zio/ZIO.scala#L959) 또한 정의되어있습니다. `for`문을 사용하여 `ZIO` 타입을 다루게 되면 Scala 컴파일러가 각 코드를 `ZIO` 타입의 `map`이나 `flatMap`으로 적절하게 변환해줍니다.
+[Scala의 for-comprehension 문서](/for-comprehension-in-scala/README.md)에서 확인할 수 있듯, Scala 컴파일러는 `for`문을 사용한 코드를 만나면 이를 적절한 형태의 고차 함수로 변환합니다. `ZIO` 타입은 [`flatMap`](https://github.com/zio/zio/blob/b38e4d30c364aa4da0b19bff6acc496e39fc81a8/core/shared/src/main/scala/zio/ZIO.scala#L628)이 정의되어있고, 추가적으로 [`map`](https://github.com/zio/zio/blob/b38e4d30c364aa4da0b19bff6acc496e39fc81a8/core/shared/src/main/scala/zio/ZIO.scala#L959) 또한 정의되어있습니다. `for`문을 사용하여 `ZIO` 타입을 다루게 되면 Scala 컴파일러가 각 코드를 `ZIO` 타입의 `map`이나 `flatMap`으로 적절하게 변환해줍니다.
 
 ```scala
 import zio._
@@ -35,4 +35,10 @@ val effectWithHOF = getTheAnswer
   .flatMap(answerText =>
     Console.printLine(s"삶, 우주 그리고 모든 것에 대한 답은 $answerText!")
   )
+```
+
+// 2. flatMap을 사용한 ZIO Effect
+val effect2: ZIO[Any, IOException, Unit] = getTheAnswer.flatMap(
+  answer => Console.printLine(s"삶, 우주 그리고 모든 것에 대한 답은 $answer!")
+)
 ```

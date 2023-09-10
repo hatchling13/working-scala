@@ -239,3 +239,15 @@ lazy val `for-comprehension-in-zio` = project
 lazy val `for-comprehension-in-scala` = project
   .settings(sharedSettings)
   .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
+
+lazy val `multi-project` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+    )
+  )
+
+lazy val `testing` = project
+  .settings(sharedSettings)
+
+
