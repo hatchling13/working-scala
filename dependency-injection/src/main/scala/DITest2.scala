@@ -20,6 +20,9 @@ object DITest2 extends ZIOAppDefault {
     val layer = ZLayer.succeed(new 판교식당저장소)
   }
 
+  object 공덕식당저장소 {
+    val layer = ZLayer.succeed(new 공덕식당저장소)
+  }
 
   // 판교식당저장소가 주입되었다.
   def useCaseUsingZLayer(): ZIO[식당저장소, IOException, Unit] = for {
