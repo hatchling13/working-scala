@@ -5,73 +5,37 @@
 ```
 
 ## 개요
-Scala에서의 `for`문은 언뜻 보면 다른 명령형 언어들과 비슷해보이지만, 그 속을 들여다보면 그리 만만한 녀석이 아니라는 것을 알 수 있습니다. Scala의 `for`문은 어떻게 쓰이느냐에 따라 각각 다른 형태의 [고차 함수](https://ko.wikipedia.org/wiki/%EA%B3%A0%EC%B0%A8_%ED%95%A8%EC%88%98)로 변환됩니다. 다시 말하자면, Scala의 `for`문은 사실 고차 함수를 간단하게 사용하기 위해 언어 차원에서 제공하는 ['문법적 설탕'(Syntactic Sugar)](https://hjaem.info/articles/kr_2008_1)이라고 할 수 있습니다. 무슨 말인지 차근차근 따라가봅시다.
+ZIO는 함수형 프로그래밍에 그 기반이 있는 라이브러리이며, 함수형 프로그래밍에서는 부수 효과를 될 수 있는 한 제거하고 싶어합니다. 부수 효과가 없는 함수(즉, 순수 함수)는 다른 함수의 결과에 영향을 미칠 수 없어, 특정 함수의 동작을 이해하려 할 때 명시된 입출력 외에 작업자가 추가로 신경써야 될 정보가 줄어들기 때문입니다. 그러나 컴퓨터를 이용하여 처리해야 하는 실세계의 작업들은 대개 부수 효과를 포함하기 마련입니다. 함수형 프로그래밍에서는 이러한 문제를 '모나드'라는 개념을 이용하여 해결하고 있으며, ZIO 또한 마찬가지입니다. ZIO의 핵심 자료형인 `ZIO` 타입은 모나드의 특성을 가지고 있기 때문에 '모나딕 타입'이라고 부를 수 있으며, 이 덕분에 `ZIO` 타입에 for문을 적용할 수 있습니다.
 
-### for <-> foreach
-```scala
-// 1. for 키워드를 사용한 반복
-for (i <- (1 until 10)) println(i)
+### 모나딕 타입
+어떠한 타입이 모나딕 타입이 되기 위해서는 두 가지 종류의 연산이 정의되어야 합니다. `ZIO` 타입은 다음과 같이 두 가지 연산을 모두 정의하고 있습니다:
+1. 임의의 타입 `A`를 `ZIO[R, E, A]` 타입으로 만들어주는 연산: 대표적으로 `ZIO.succeed()` 함수가 있으며, 이외에도 다양한 함수들을 소개하는 [공식 문서](https://zio.dev/overview/creating-effects)가 있습니다.
+2. 임의의 타입 `A`, `B`에 대해 `ZIO[R1, E1, A]`를 `ZIO[R2, E2, B]`로 만들어주는 연산: `ZIO.flatMap()` 함수를 이용하여 두 `ZIO` 타입을 순차적으로 연결해줄 수 있으며, [공식 문서](https://zio.dev/overview/basic-operations/#chaining)에 그 용례가 나와있습니다.
 
-// 2. 고차함수 foreach를 사용한 반복
-(1 until 10).foreach(i => println(i))
-```
+자세한 구현체는 [여기](https://github.com/zio/zio/blob/series/2.x/core/shared/src/main/scala/zio/ZIO.scala)서 확인할 수 있습니다.
 
-### for <-> withFilter
-```scala
-// 1. for 키워드를 사용한 필터링
-for {
-  i <- 1 to 10
-  if i % 2 == 0
-} {
-  println(i)
-}
-
-// 2. 고차함수 foreach, withFilter(또는 filter)를 사용한 필터링
-(1 to 10).withFilter(i => i % 2 == 0).foreach(x => println(x))
-```
-
-### for <-> map
-```scala
-// 1. for 키워드를 사용한 변환
-val list = for (i <- 1 to 5) yield i * 2
-
-// 2. 고차함수 map을 사용한 변환
-val list = (1 to 5).map(i => i * 2)
-```
-
-### for <-> flatMap
-```scala
-def quotient(a: Int, b: Int) = if (b == 0) None else Some(a / b)
-
-val list = List((3, 2), (10, 3), (20, 0), (4, 1))
-
-// 1. for 키워드를 사용한 변환
-val result = for {
-  tuple <- list
-  res <- quotient(tuple._1, tuple._2)
-} yield res
-
-// 2. 고차함수 flatMap을 사용한 변환
-val result = list.flatMap(tuple => quotient(tuple._1, tuple._2))
-```
-
-### 비교 및 분석
-각각의 경우에 대해 두 코드는 동일한 작업을 수행하며, 더 나아가서 Scala에서 두 코드는 서로 동치입니다. 컴파일러가 첫번째 형태의 코드를 두번째 형태로 변환하기 때문입니다. 따라서 작업자의 기호에 따라 어떤 스타일로 작성할 지 선택할 수 있습니다.
-
-### ZIO 타입에 대해 for 사용하기
-`ZIO` 타입은 `for`문을 사용하기 위해 필요한 고차 함수가 모두 구현되어 있습니다. `map`과 `flatMap`은 물론, `Iterable`을 상속받은 `Collection`에 대해 사용할 수 있는 `foreach`와 `filter`가 구현되어 있어 일반 Scala에서처럼 `for`문을 사용할 수 있습니다. 자세한 구현체는 [여기](https://github.com/zio/zio/blob/series/2.x/core/shared/src/main/scala/zio/ZIO.scala)서 확인할 수 있습니다. 
+### ZIO 타입에 for문 적용하기
+[Scala의 for-comprehension 문서](/for-comprehension-in-scala/README.md)에서 확인할 수 있듯, Scala 컴파일러는 `for`문을 사용한 코드를 만나면 이를 적절한 형태의 고차 함수로 변환합니다. `ZIO` 타입은 [`flatMap`](https://github.com/zio/zio/blob/b38e4d30c364aa4da0b19bff6acc496e39fc81a8/core/shared/src/main/scala/zio/ZIO.scala#L628)이 정의되어있고, 추가적으로 [`map`](https://github.com/zio/zio/blob/b38e4d30c364aa4da0b19bff6acc496e39fc81a8/core/shared/src/main/scala/zio/ZIO.scala#L959) 또한 정의되어있습니다. `for`문을 사용하여 `ZIO` 타입을 다루게 되면 Scala 컴파일러가 각 코드를 `ZIO` 타입의 `map`이나 `flatMap`으로 적절하게 변환해줍니다.
 
 ```scala
 import zio._
-import java.io.IOException
 
 val getTheAnswer = ZIO.succeed(42)
 
 // 1. for 키워드를 사용한 ZIO Effect
-val effect1: ZIO[Any, IOException, Unit] = for {
+val effectWithFor = for {
   answer <- getTheAnswer
-  _ <- Console.printLine(s"삶, 우주 그리고 모든 것에 대한 답은 $answer!")
+  answerText = answer.toString()
+  _ <- Console.printLine(s"삶, 우주 그리고 모든 것에 대한 답은 $answerText!")
 } yield ()
+
+// 2. 고차 함수를 사용한 ZIO Effect
+val effectWithHOF = getTheAnswer
+  .map(answer => answer.toString())
+  .flatMap(answerText =>
+    Console.printLine(s"삶, 우주 그리고 모든 것에 대한 답은 $answerText!")
+  )
+```
 
 // 2. flatMap을 사용한 ZIO Effect
 val effect2: ZIO[Any, IOException, Unit] = getTheAnswer.flatMap(
