@@ -117,7 +117,7 @@ _ <- useCaseUsingZLayer().provideLayer(판교식당저장소.layer)
 ```
 <br/>
 
-`ZIO.service[T]`  
+`ZIO.service`  
 ZIO 환경에서 특정 서비스에 접근할 수 있습니다.  
 provideLayer 메서드를 통해 ZIO 환경에 의존성을 주입하였다면, ZIO.service를 통해 주입한 의존성을 가져와서 사용할 수 있습니다.    
 따라서 ZIO.service의 대괄호[]에는 제공받은 의존성 타입이 와야 합니다.    
