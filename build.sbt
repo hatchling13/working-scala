@@ -235,3 +235,7 @@ lazy val `deepzio4-pair1` = project
 lazy val `for-comprehension-in-zio` = project
   .settings(sharedSettings)
   .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
+
+lazy val `for-comprehension-in-scala` = project
+  .settings(sharedSettings)
+  .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
