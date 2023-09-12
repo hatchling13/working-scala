@@ -6,13 +6,28 @@ import Service._
 object Controller {
   def getAction() =
     for {
-      input <- readLine("예약을 하시려면 1번, 변경하시려면 2번 을 입력해주세요.")
+      input <- readLine("예약을 하시려면 1, 변경하시려면 2를 입력해주세요.")
       action <- input match {
-        case "1" => ZIO.succeed("예약하기")
-        case "2" => ZIO.succeed("예약변경")
+        case "1" => ZIO.succeed(doReservation)
+        case "2" => ZIO.succeed(changeReservation)
         case _   => ZIO.fail("잘못된 입력입니다")
       }
     } yield action
+
+  def doReservation() =
+    for {
+      // 1. 전체 식당 조회
+      restaurant_list <- Controller.showAllRestrauntsToUser()
+      // 2. 식당 선택
+      target_restaurant <- Controller.selectRestaurantByNumber()
+      _ <- Controller.registerReservation(target_restaurant)
+
+    } yield ()
+
+  def changeReservation() =
+    for {
+      _ <- Controller.checkReservationByInfo()
+    } yield ()
 
   def showAllRestrauntsToUser() =
     for {
@@ -79,9 +94,10 @@ object Controller {
 
     } yield ()
 
-  def selectRestaurantByNumber() = for {
-    number <- readLine("예약을 원하시는 식당의 번호를 입력해주세요 : ")
-    id = Integer.parseInt(number)
-    restaurant <- Repository.findRestaurantById(id)
-  } yield restaurant
+  def selectRestaurantByNumber() =
+    for {
+      number <- readLine("예약을 원하시는 식당의 번호를 입력해주세요 : ")
+      id = Integer.parseInt(number)
+      restaurant <- Repository.findRestaurantById(id)
+    } yield restaurant
 }
