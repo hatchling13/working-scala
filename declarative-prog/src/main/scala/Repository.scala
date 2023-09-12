@@ -5,7 +5,7 @@ import _root_.doobie.implicits._
 import _root_.doobie._
 import Util._
 
-object Repository { 
+object Repository {
 
   def findRestaurantById(id: Int) =
     for {
@@ -17,11 +17,10 @@ object Repository {
               .query[Restaurant]
               .unique
           }
-          
+
         } yield (res))
     } yield (restaurant)
-    
-    
+
   def getReservationByInfo(info: ReservationInfo) =
     for {
       db <- ZIO.service[Database.Service]
@@ -35,27 +34,25 @@ object Repository {
         } yield (res))
     } yield (reservation)
 
-    
   def saveReservation(reservation: Reservation) = for {
     db <- ZIO.service[Database.Service]
     insertResult <- db
       .transactionOrWiden(for {
-      res <- tzio {
-        sql"""|INSERT INTO reservation (name, phone, restaurant_id, reservation_date, reservation_time, guests) VALUES
+        res <- tzio {
+          sql"""|INSERT INTO reservation (name, phone, restaurant_id, reservation_date, reservation_time, guests) VALUES
                     |(${reservation.name},
                     | ${reservation.phone},
                     | ${reservation.restaurant_id},
                     | ${reservation.reservation_date},
                     | ${reservation.reservation_time},
                     | ${reservation.guests})""".stripMargin
-        .update()
-        .run
-      }
-    } yield ())
+            .update()
+            .run
+        }
+      } yield ())
   } yield ()
 
-  def saveCoupon(coupon: Coupon) 
-    = for {
+  def saveCoupon(coupon: Coupon) = for {
     db <- ZIO.service[Database.Service]
     _ <- db
       .transactionOrWiden(for {
@@ -69,7 +66,8 @@ object Repository {
       } yield ())
   } yield ()
 
-  def getAllRestaurantList(): ZIO[doobie.Database.Service, Exception, List[Restaurant]] = for {
+  def getAllRestaurantList()
+      : ZIO[doobie.Database.Service, Exception, List[Restaurant]] = for {
     database <- ZIO.service[Database.Service]
     // 예약 가능한 전체 식당 조회해서 출력
     list <- database
@@ -84,53 +82,56 @@ object Repository {
 
   } yield list
 
-  def checkIfRestaurantExist(restaurantId: String): ZIO[doobie.Database.Service, DbException, Boolean] = for {
+  def checkIfRestaurantExist(
+      restaurantId: String
+  ): ZIO[doobie.Database.Service, DbException, Boolean] = for {
     database <- ZIO.service[Database.Service]
     result <- database
       .transactionOrWiden(for {
         res <- tzio {
-        sql"""|select EXISTS(select * from restaurant where id = ${Integer.parseInt(restaurantId)})""".stripMargin
-      .query[Boolean]
-      .unique
-      }
-    } yield res)
+          sql"""|select EXISTS(select * from restaurant where id = ${Integer
+            .parseInt(restaurantId)})""".stripMargin
+            .query[Boolean]
+            .unique
+        }
+      } yield res)
   } yield result
 
-
-  def checkIfReservationExist(info: ReservationInfo): ZIO[doobie.Database.Service, DbException, Boolean] = for {
+  def checkIfReservationExist(
+      info: ReservationInfo
+  ): ZIO[doobie.Database.Service, DbException, Boolean] = for {
     database <- ZIO.service[Database.Service]
     result <- database
       .transactionOrWiden(for {
         res <- tzio {
-        sql"""|select EXISTS(select * from reservation where name = ${info.name} and phone = ${info.phone})""".stripMargin
-      .query[Boolean]
-      .unique
-      }
-    } yield res)
+          sql"""|select EXISTS(select * from reservation where name = ${info.name} and phone = ${info.phone})""".stripMargin
+            .query[Boolean]
+            .unique
+        }
+      } yield res)
   } yield result
 
-
-  def updateReservation(target: Reservation): ZIO[doobie.Database.Service, DbException, Unit] = for {
+  def updateReservation(
+      target: Reservation
+  ): ZIO[doobie.Database.Service, DbException, Unit] = for {
     database <- ZIO.service[Database.Service]
     // TODO : 예약 수정 정보를 입력받아서 update
     _ <- database
       .transactionOrWiden(for {
         res <- tzio {
-          sql"""|update reservation set reservation_time='0000' where name = ${target.name} and phone = ${target.phone}""".stripMargin
-            .update
-            .run
+          sql"""|update reservation set reservation_time='0000' where name = ${target.name} and phone = ${target.phone}""".stripMargin.update.run
         }
       } yield res)
   } yield ()
 
-  def cancelReservation(target: ReservationInfo): ZIO[doobie.Database.Service, DbException, Unit] = for {
+  def cancelReservation(
+      target: ReservationInfo
+  ): ZIO[doobie.Database.Service, DbException, Unit] = for {
     database <- ZIO.service[Database.Service]
     _ <- database
       .transactionOrWiden(for {
         res <- tzio {
-          sql"""|delete from reservation where name = ${target.name} and phone = ${target.phone}""".stripMargin
-            .update
-            .run
+          sql"""|delete from reservation where name = ${target.name} and phone = ${target.phone}""".stripMargin.update.run
         }
       } yield res)
     _ = zio.Console.printLine("예약이 취소되었습니다.")

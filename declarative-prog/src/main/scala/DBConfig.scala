@@ -3,7 +3,6 @@ import io.github.gaelrenoux.tranzactio.doobie.{Database, tzio}
 import zio._
 import java.sql.{Connection, DriverManager, SQLException}
 
-
 trait DBService {
   def connection: ZLayer[Any, SQLException, Connection]
 
@@ -11,17 +10,20 @@ trait DBService {
     connection >>> ConnectionSource.fromConnection >>> Database.fromConnectionSource
 }
 
-object Postgres extends DBService  {
+object Postgres extends DBService {
   val config = DBConfig(
     Host("localhost", "postgres", 5433),
     Login("postgres", "1q2w3e4r")
   )
 
-  val url = s"jdbc:postgresql://${config.host.path}:${config.host.port}/${config.host.name}?user=${config.login.user}&password=${config.login.password}"
+  val url =
+    s"jdbc:postgresql://${config.host.path}:${config.host.port}/${config.host.name}?user=${config.login.user}&password=${config.login.password}"
 
   val driver = "org.postgresql.Driver"
 
+  // VSC에서만 발생하는 에러때문에 필요합니다.
   Class.forName(driver)
+
   def connection = for {
     layer <- ZLayer(ZIO.attempt(DriverManager.getConnection(url)))
       .mapError(error => new SQLException(error))

@@ -1,4 +1,3 @@
-
 case class Coupon(owner: String, discount_rate: Int) {}
 
 case class Restaurant(id: Int, name: String)
