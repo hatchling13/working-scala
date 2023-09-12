@@ -234,7 +234,8 @@ lazy val `deepzio4-pair1` = project
     )
   )
 
- lazy val `mocking` = project
+
+lazy val `mocking` = project
   .settings(sharedSettings)
   .settings(
     libraryDependencies ++= Seq(
@@ -242,6 +243,14 @@ lazy val `deepzio4-pair1` = project
 
     )
   )
+
+lazy val `for-comprehension-in-zio` = project
+  .settings(sharedSettings)
+  .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
+
+lazy val `for-comprehension-in-scala` = project
+  .settings(sharedSettings)
+  .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
 
 lazy val `db-connection` = project
 .settings(sharedSettings)
@@ -264,7 +273,6 @@ lazy val `multi-project` = project
 
 lazy val `testing` = project
   .settings(sharedSettings)
-
 
 lazy val `error-handling` = project
   .settings(sharedSettings)
