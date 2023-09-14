@@ -137,10 +137,11 @@ object 공덕식당저장소 {
   val layer = ZLayer.succeed(new 공덕식당저장소)
 }
 ```
-위와 같이 클래스가 선언되었을 때 ZIO.service와 ZIOEffect의 R 타입은 아래와 같이 올 수 있습니다.
+위와 같이 클래스가 선언되었다고 해봅시다.  
+하위 타입의 인스턴스가 상위 타입으로 사용될 수 있는 다형성이라고 합니다.  
+따라서 시그니처가 ZIO[식당저장소, IOException, Unit]인 메서드는 아래와 같은 형태로 올 수 있습니다.
 ```scala
-
-// ZIO[식당저장소, IOException, Unit]에서 식당저장소 대신 공덕식당저장소가 올 수 있습니다.
+// 다형성에 의해 식당저장소의 하위 타입인 공덕식당저장소를 제공받아, ZIO Effect의 R 타입으로 공덕식당저장소를 사용할 수도 있습니다.
 // ex) def useCaseUsingZLayer(): ZIO[공덕식당저장소, IOException, Unit] = for { ... }
 def useCaseUsingZLayer(): ZIO[식당저장소, IOException, Unit] = for {
   repo <- ZIO.service[식당저장소]
