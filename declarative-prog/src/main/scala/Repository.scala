@@ -135,17 +135,17 @@ object Repository {
     _ <- database
       .transactionOrWiden(for {
         res <- tzio {
-          sql"""|update reservation set (name, phone, restaurant_id, reservation_date, reservation_time, guests) VALUES
-                    |(${target.userInfo.name},
-                    | ${target.userInfo.phone},
-                    | ${target.restaurant_id},
-                    | ${target.reservation_date},
-                    | ${target.reservation_time},
-                    | ${target.guests}
-                    | ${None})
-            """.stripMargin.update.run
-        }}
-        yield res)
+  sql"""|UPDATE reservation
+        |SET
+        |    name = ${target.userInfo.name},
+        |    phone = ${target.userInfo.phone},
+        |    restaurant_id = ${target.restaurant_id},
+        |    reservation_date = ${target.reservation_date},
+        |    reservation_time = ${target.reservation_time},
+        |    guests = ${target.guests}
+        |WHERE reservation_id = ${target.reservation_id};
+    """.stripMargin.update.run
+        }} yield res)
       } yield()
 
 

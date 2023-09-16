@@ -7,7 +7,7 @@ import Util._
 object Controller {
   def getAction() =
     for {
-      input <- readLine("예약을 하시려면 1, 변경하시려면 2를 입력해주세요.")
+      input <- readLine("예약을 하시려면 1, 변경/취소하시려면 2를 입력해주세요.")
       _ <- input match {
         case "1" => Controller.doReservation()
         case "2" => Controller.selectNextAcionFromUser()
@@ -47,7 +47,7 @@ object Controller {
         case "1" => 
 
           ZIO.ifZIO(Repository.checkIfReservationExist(info))(
-            onTrue = zio.Console.printLine("TEMP message"),
+            onTrue = Controller.changeReservation(info),
             onFalse = zio.Console.printLine("입력하신 정보에 해당하는 예약이 없습니다.")
           )
 
@@ -60,18 +60,40 @@ object Controller {
       }
     } yield ()
 
-  def changeReservationByNumber() =
+  def changeReservation(info: UserInfo) =
     for {
       reservationList <- Repository.getReservationByInfo(info)
+
       _ <- zio.Console.printLine(reservationList)
       reservationNumber <- readLine("변경을 원하는 예약의 예약번호를 입력해주세요.")
       index = Integer.parseInt(reservationNumber)
-      targetReservation <- Repository.getReservationByNumber(index)
 
-      newRes <- Controller.getReservationInputValueFromUser()
-      _ <- zio.Console.printLine(newRes)
-      _ <- Repository.updateReservation(newRes, index)
+      targetReservation <- Repository.getReservationByNumber(index)
+      targetRestaurant <- Repository.findRestaurantById(index)
+
+      newReservation <- Controller.getChangedReservationInputValueFromUser(targetReservation, targetRestaurant)      
+      _ <- Repository.updateReservation(newReservation)
+      _ <- zio.Console.printLine("예약이 변경되었습니다.")
     } yield ()
+
+  def getChangedReservationInputValueFromUser(reservation: Reservation, restaurant: Restaurant) =
+    for{
+      
+      reservation_date <- readLine("변경할 예약 날짜를 입력해주세요 (ex:0730) : ")
+      reservation_time <- readLine("변경할 예약 시간을 입력해주세요 (ex:1430) : ")
+      guests <- readLine("변경할 인원 수를 숫자로 입력해주세요 : ")
+
+      
+      changedReservation = Reservation(
+        reservation.userInfo,
+        restaurant.id,
+        reservation_date,
+        reservation_time,
+        Util.toInt(guests),
+        None
+      )
+
+    } yield(changedReservation)
 
 
   def getReservationInputValueFromUser(targetRestaurant: Restaurant) =
