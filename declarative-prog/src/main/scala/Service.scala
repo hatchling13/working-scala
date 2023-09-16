@@ -17,7 +17,7 @@ object Service {
   def issueCoupon(reservation: Reservation) =
     for {
       discountRate <- ZIO.fromOption(calculateRateByGuestNumber(reservation))
-      target_coupon = Coupon(reservation.name, discountRate)
+      target_coupon = Coupon(reservation.userInfo.name, discountRate)
       _ <- Repository.saveCoupon(target_coupon)
     } yield ()
 

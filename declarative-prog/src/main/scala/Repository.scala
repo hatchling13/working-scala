@@ -21,7 +21,7 @@ object Repository {
         } yield (res))
     } yield (restaurant)
 
-  def getReservationByInfo(info: ReservationInfo) =
+  def getReservationByInfo(info: UserInfo) =
     for {
       db <- ZIO.service[Database.Service]
       reservation <- db
@@ -29,23 +29,39 @@ object Repository {
           res <- tzio {
             sql"""|select * from reservation where name = ${info.name} and phone = ${info.phone}""".stripMargin
               .query[Reservation]
-              .to[List]
+              .unique
+              // .to[List]
+              
           }
         } yield (res))
     } yield (reservation)
 
-  def saveReservation(reservation: Reservation) = for {
+  def getReservationByNumber(number: Int) = 
+    for {
+    db <- ZIO.service[Database.Service]
+      reservation <- db
+        .transactionOrWiden(for {
+          res <- tzio {
+            sql"""|select * from reservation where reservation_id = ${number}""".stripMargin
+              .query[Reservation]
+              .unique
+          }
+        } yield (res))
+    } yield (reservation)
+
+  def makeReservationToRestaurant(restaurant: Restaurant, reservation: Reservation) = for {
     db <- ZIO.service[Database.Service]
     insertResult <- db
       .transactionOrWiden(for {
         res <- tzio {
           sql"""|INSERT INTO reservation (name, phone, restaurant_id, reservation_date, reservation_time, guests) VALUES
-                    |(${reservation.name},
-                    | ${reservation.phone},
-                    | ${reservation.restaurant_id},
+                    |(${reservation.userInfo.name},
+                    | ${reservation.userInfo.phone},
+                    | ${restaurant.id},
                     | ${reservation.reservation_date},
                     | ${reservation.reservation_time},
-                    | ${reservation.guests})""".stripMargin
+                    | ${reservation.guests}
+                    | ${None})""".stripMargin
             .update()
             .run
         }
@@ -67,7 +83,8 @@ object Repository {
   } yield ()
 
   def getAllRestaurantList()
-      : ZIO[doobie.Database.Service, Exception, List[Restaurant]] = for {
+      : ZIO[doobie.Database.Service, Exception, List[Restaurant]] = 
+    for {
     database <- ZIO.service[Database.Service]
     // 예약 가능한 전체 식당 조회해서 출력
     list <- database
@@ -98,7 +115,7 @@ object Repository {
   } yield result
 
   def checkIfReservationExist(
-      info: ReservationInfo
+      info: UserInfo
   ): ZIO[doobie.Database.Service, DbException, Boolean] = for {
     database <- ZIO.service[Database.Service]
     result <- database
@@ -115,26 +132,33 @@ object Repository {
       target: Reservation
   ): ZIO[doobie.Database.Service, DbException, Unit] = for {
     database <- ZIO.service[Database.Service]
-    // TODO : 예약 수정 정보를 입력받아서 update
     _ <- database
       .transactionOrWiden(for {
         res <- tzio {
-          sql"""|update reservation set reservation_time='0000' where name = ${target.name} and phone = ${target.phone}""".stripMargin.update.run
-        }
-      } yield res)
-  } yield ()
+          sql"""|update reservation set (name, phone, restaurant_id, reservation_date, reservation_time, guests) VALUES
+                    |(${target.userInfo.name},
+                    | ${target.userInfo.phone},
+                    | ${target.restaurant_id},
+                    | ${target.reservation_date},
+                    | ${target.reservation_time},
+                    | ${target.guests}
+                    | ${None})
+            """.stripMargin.update.run
+        }}
+        yield res)
+      } yield()
 
-  def cancelReservation(
-      target: ReservationInfo
-  ): ZIO[doobie.Database.Service, DbException, Unit] = for {
+
+  def cancelReservation(target: UserInfo): ZIO[doobie.Database.Service, DbException, Unit] = for {
     database <- ZIO.service[Database.Service]
     _ <- database
       .transactionOrWiden(for {
         res <- tzio {
           sql"""|delete from reservation where name = ${target.name} and phone = ${target.phone}""".stripMargin.update.run
         }
+       
       } yield res)
-    _ = zio.Console.printLine("예약이 취소되었습니다.")
   } yield ()
+
 
 }

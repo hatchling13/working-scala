@@ -2,16 +2,17 @@ case class Coupon(owner: String, discount_rate: Int) {}
 
 case class Restaurant(id: Int, name: String)
 
+
 case class Reservation(
-    name: String,
-    phone: String,
+    userInfo: UserInfo,
     restaurant_id: Int,
     reservation_date: String,
     reservation_time: String,
-    guests: Int
+    guests: Int,
+    reservation_id: Option[Int] = None
 )
 
-case class ReservationInfo(
+case class UserInfo(
     name: String,
     phone: String
 )
