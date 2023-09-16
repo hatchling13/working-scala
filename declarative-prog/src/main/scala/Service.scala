@@ -6,6 +6,7 @@ import _root_.doobie.implicits._
 import _root_.doobie._
 
 object Service {
+  // 도메인으로 분리하기엔 코드 양이 너무 적어서 Service에 넣었습니다.
   def calculateRateByGuestNumber(reservation: Reservation): Option[Int] =
     reservation.guests match {
       case guests if guests > 0 && guests < 10 => Some(guests * 10)
@@ -13,6 +14,7 @@ object Service {
       case _                                   => None
     }
 
+  
   // 인원 수에 맞게 할인율을 계산한 쿠폰을 발급하는 함수입니다.
   def issueCoupon(reservation: Reservation) =
     for {

@@ -18,14 +18,13 @@ object Controller {
   def doReservation() =
     for {
       // 전체 식당 조회
-      _ <- ZIO.unit
       restraunt_list <- Repository.getAllRestaurantList()
       _ <- zio.Console.printLine(s"${restraunt_list}")
       _ <- zio.Console.printLine("예약 가능한 식당의 목록입니다.")
 
       // 번호로 예약할 식당 선택
-      number <- readLine("예약을 원하시는 식당의 번호를 입력해주세요 : ")
-      id = Util.toInt(number)
+      rawIdInput <- readLine("예약을 원하시는 식당의 번호를 입력해주세요 : ")
+      id = Util.toInt(rawIdInput)
       target_restaurant <- Repository.findRestaurantById(id)
       target_reservation <- Controller.getReservationInputValueFromUser(target_restaurant)
       _ <- Repository.makeReservationToRestaurant(target_restaurant, target_reservation)
@@ -73,6 +72,7 @@ object Controller {
 
       newReservation <- Controller.getChangedReservationInputValueFromUser(targetReservation, targetRestaurant)      
       _ <- Repository.updateReservation(newReservation)
+      // _ <- Service.changeCoupon()
       _ <- zio.Console.printLine("예약이 변경되었습니다.")
     } yield ()
 
@@ -93,7 +93,7 @@ object Controller {
         None
       )
 
-    } yield(changedReservation)
+    } yield (changedReservation)
 
 
   def getReservationInputValueFromUser(targetRestaurant: Restaurant) =
