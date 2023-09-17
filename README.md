@@ -58,3 +58,26 @@
 예시) FileName.scala
 ### main 클래스 이름
 - Main으로 통일한다.
+
+
+
+## 타입 시그니처 문서 생성하기
+
+```bash
+# path
+~/working-scala/
+
+# generate docs using sbt
+$ sbt project {project-name}
+
+$ doc
+
+# command
+npx http-server {project-name}/target/scala-2.13/api 
+
+```
+참고자료
+
+[scala-lang 문서](https://docs.scala-lang.org/overviews/scaladoc/generate.html)
+
+[sbt 문서](https://www.scala-sbt.org/1.x/docs/Howto-Scaladoc.html)
