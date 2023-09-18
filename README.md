@@ -8,6 +8,8 @@
 
 형식) `프로젝트-이름` @기여자-이름
 
+`bicycle_db` @notJoon
+
 `db-connection` @Jihun @Whis-dev
 
 `declarative-prog` @darkenpeng
