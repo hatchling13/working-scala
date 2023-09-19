@@ -18,6 +18,8 @@
 
 `error-handling` @Whis-dev
 
+`file-handling` @ycheese
+
 `for-comprehension-in-scala` @hatchling13
 
 `for-comprehension-in-zio` @hatchling13

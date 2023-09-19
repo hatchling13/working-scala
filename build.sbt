@@ -53,6 +53,14 @@ lazy val `declarative-prog` = project
 lazy val `dependency-injection` = project
   .settings(sharedSettings)
 
+lazy val `file-handling` = project
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %% "os-lib" % "0.9.1"
+    )
+  )
+
 lazy val `for-comprehension-in-zio` = project
   .settings(sharedSettings)
   .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
