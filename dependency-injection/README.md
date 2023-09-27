@@ -8,10 +8,10 @@ ZIO 의존성 주입에 대해 자세히 알고 싶다면 [ZIO 의존성 주입 
 <br/>
 
 두 가지 방식으로 의존성 주입을 다루어 보겠습니다.
-1. [의존성 주입(DIExam.scala)](https://github.com/SHSongs/working-scala/blob/main/dependency-injection/src/main/scala/DiTest1.scala)
+1. [의존성 주입(DIExam.scala)](./src/main/scala/DITest1.scala)
 - 일반적으로 사용되는 의존성 주입을 표현한 코드입니다.
 - 다른 언어에서도 동일하게 적용할 수 있습니다.
-2. [ZIO 라이브러리를 활용한 의존성 주입(DIExam2.scala)](https://github.com/SHSongs/working-scala/blob/main/dependency-injection/src/main/scala/DiTest2.scala)
+2. [ZIO 라이브러리를 활용한 의존성 주입(DIExam2.scala)](./src/main/scala/DITest2.scala)
 - ZIO에서 제공하는 메서드를 통해 의존성 주입 코드를 작성했습니다.
 - 일반적인 의존성 주입 방식이라기 보다는 ZIO 라이브러리를 사용할 때 권장되는 방식입니다.
 
@@ -53,7 +53,7 @@ def useCase() = for {
 <br/>
 
 그런데 이번엔 강남의 모든 식당 이름을 불러와달라는 요청이 들어왔습니다.  
-개발자는 위와 비슷한 코드를 또 구현해야 할 것이고, 새로운 식당 이름을 요청 받을 때마다 동일한 작업을 반복해아할 것입니다.  
+개발자는 위와 비슷한 코드를 또 구현해야 할 것이고, 새로운 식당 이름을 요청 받을 때마다 동일한 작업을 반복해야할 것입니다.  
 만약 repo 객체를 useCase 메서드로부터 분리함으로써 repo 객체에 따라 서로 다른 데이터가 표현되도록 할 수 있다면, 개발자는 많은 시간을 아낄 수 있을 것 같습니다.  
 
 아래 코드에서 useCase를 서비스라고 하고 repo를 의존성이라고 생각하고 살펴보겠습니다.
@@ -85,7 +85,7 @@ _ <- useCase(new 강남식당저장소)
 <br/><br/>
 
 ## ZIO Effect에 의존성 주입하기
-[DIExam1.scala](https://github.com/SHSongs/working-scala/blob/main/dependency-injection/src/main/scala/DiTest1.scala)에서는 일반적인 메서드에 의존성을 직접 주입했습니다.  
+[DIExam1.scala](./src/main/scala/DITest1.scala)에서는 일반적인 메서드에 의존성을 직접 주입했습니다.  
 하지만 ZIO에서는 몇 가지 제공되는 메서드를 통해 ZIO Effect에 의존성을 제공하고, 주입받은 의존성을 사용할 수 있습니다.
 
 ### 관련 정보
@@ -97,7 +97,7 @@ _ <- useCase(new 강남식당저장소)
 <br/><br/>
 
 ## 메서드 목록
-`ZLayer.succeed()`  
+`ZLayer.succeed`  
 값이나 서비스를 포함하는 레이어를 생성합니다.
 - [ZLayer 알아보기](https://zio.dev/reference/contextual/zlayer/)
 
@@ -108,7 +108,7 @@ object 판교식당저장소 {
 ```
 <br/>
 
-`provideLayer()`  
+`provideLayer`  
 ZLayer라는 계층을 통해 ZIO Effect에서 R에 해당하는 의존성을 제공해 줍니다.
 
 ```scala
@@ -138,7 +138,7 @@ object 공덕식당저장소 {
 }
 ```
 위와 같이 클래스가 선언되었다고 해봅시다.  
-하위 타입의 인스턴스가 상위 타입으로 사용될 수 있는 다형성이라고 합니다.  
+하위 타입의 인스턴스가 상위 타입으로 사용될 수 있는 것을 다형성이라고 합니다.  
 따라서 시그니처가 ZIO[식당저장소, IOException, Unit]인 메서드는 아래와 같은 형태로 올 수 있습니다.
 ```scala
 // 다형성에 의해 식당저장소의 하위 타입인 공덕식당저장소를 제공받아, ZIO Effect의 R 타입으로 공덕식당저장소를 사용할 수도 있습니다.
