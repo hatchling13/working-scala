@@ -33,14 +33,15 @@
 `webhook` @notJoon
 
 ## 프로젝트 별 실행방법
-
-예제코드의 실행 결과를 보려면 각 프로젝트의 Main Class를 실행해주세요.
-경로 : ~/working-scala/
+- 예제코드의 실행 결과를 보려면 각 프로젝트의 Main Class를 실행해주세요.
+- 경로 : ~/working-scala/
 
   ### sbt로 실행
+    ```
     sbt
     project `프로젝트 이름`
     run
+    ```
   [스칼라 공식문서 - getting-started](https://docs.scala-lang.org/getting-started/index.html)
 
   ### inteliJ로 실행
@@ -51,15 +52,19 @@
 ### 디렉토리 구조
 - 스칼라의 기본 컨벤션을 따른다.
 - src/main/scala 하위에 Main.scala가 위치힌다.
+
+  
 ### 프로젝트 이름
 - 영어 소문자로 표기한다.
 - 띄어쓰기는 `-`로 표기한다.
+- 예시) working-scala
 
-예시) working-scala
+
 ### 파일 이름
 - 파스칼 케이스로 표기한다.
+- 예시) FileName.scala
 
-예시) FileName.scala
+
 ### main 클래스 이름
 - Main으로 통일한다.
 
@@ -81,7 +86,6 @@ npx http-server {project-name}/target/scala-2.13/api
 
 ```
 참고자료
+[scala-lang scaladoc 문서](https://docs.scala-lang.org/overviews/scaladoc/generate.html)
 
-[scala-lang 문서](https://docs.scala-lang.org/overviews/scaladoc/generate.html)
-
-[sbt 문서](https://www.scala-sbt.org/1.x/docs/Howto-Scaladoc.html)
+[sbt scaladoc 문서](https://www.scala-sbt.org/1.x/docs/Howto-Scaladoc.html)
