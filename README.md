@@ -6,31 +6,20 @@
 
 ### 프로젝트 별 기여자
 
-형식) `프로젝트-이름` @기여자-이름
+> 형식) `프로젝트-이름` @기여자-이름
 
-`bicycle_db` @notJoon
-
-`db-connection` @Jihun @Whis-dev
-
-`declarative-prog` @darkenpeng
-
-`dependency-injection` @Jihun
-
-`error-handling` @Whis-dev
-
-`file-handling` @ycheese
-
-`for-comprehension-in-scala` @hatchling13
-
-`for-comprehension-in-zio` @hatchling13
-
-`json-handling` @junghoon-vans
-
-`multi-project` @ycheese
-
-`testing` @ycheese
-
-`webhook` @notJoon
+- `bicycle_db` @notJoon
+- `db-connection` @Jihun @Whis-dev
+- `declarative-prog` @darkenpeng
+- `dependency-injection` @Jihun
+- `error-handling` @Whis-dev
+- `file-handling` @ycheese
+- `for-comprehension-in-scala` @hatchling13
+- `for-comprehension-in-zio` @hatchling13
+- `json-handling` @junghoon-vans
+- `multi-project` @ycheese
+- `testing` @ycheese
+- `webhook` @notJoon
 
 ## 프로젝트 별 실행방법
 - 예제코드의 실행 결과를 보려면 각 프로젝트의 Main Class를 실행해주세요.
@@ -83,9 +72,6 @@ $ doc
 
 # command
 npx http-server {project-name}/target/scala-2.13/api 
-
 ```
-참고자료
-[scala-lang scaladoc 문서](https://docs.scala-lang.org/overviews/scaladoc/generate.html)
 
-[sbt scaladoc 문서](https://www.scala-sbt.org/1.x/docs/Howto-Scaladoc.html)
+참고자료 [scala-lang scaladoc 문서](https://docs.scala-lang.org/overviews/scaladoc/generate.html) [sbt scaladoc 문서](https://www.scala-sbt.org/1.x/docs/Howto-Scaladoc.html)
